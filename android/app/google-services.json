@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1092875206780",
+    "project_id": "comunicaoalternativa-53d9b",
+    "storage_bucket": "comunicaoalternativa-53d9b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1092875206780:android:803ed91edff64f571b09f9",
+        "android_client_info": {
+          "package_name": "com.example.comunicacao_alternativa_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5GKyAHtCkDpBIZWOqjnkETSw1dN1ZJS4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1092875206780:android:3044a564ab2b2c361b09f9",
+        "android_client_info": {
+          "package_name": "com.rpadua.comunicaoAlternativa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5GKyAHtCkDpBIZWOqjnkETSw1dN1ZJS4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
