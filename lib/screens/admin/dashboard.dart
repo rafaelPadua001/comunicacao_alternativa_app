@@ -1,4 +1,4 @@
-import 'package:comunicacao_alternativa_app/screens/addPictogramScreen.dart';
+import 'settings.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -56,7 +56,7 @@ class DashboarAdmindScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AddPictogramScreen(),
+                    builder: (context) => SettingsGrid(),
                   ),
                 );
               }
