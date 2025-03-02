@@ -1,15 +1,32 @@
 import 'package:flutter/material.dart';
 import '/models/student.dart';
 import '../routes/student.routes.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class UserSelectionScreen extends StatefulWidget {
   @override
   _UserSelectionScreenState createState() => _UserSelectionScreenState();
 }
 
-
 class _UserSelectionScreenState extends State<UserSelectionScreen> {
   String? _selectedUserType;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  void _checkLoginStatus() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      //Usuario já logado
+      Future.microtask(() {
+        print(FirebaseAuth.instance.currentUser);
+        Navigator.restorablePushReplacementNamed(context, '/dashboardAdmin');
+      });
+    }
+  }
 
   void _navigateToLogin() {
     if (_selectedUserType != null) {
@@ -26,9 +43,7 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
       }
     }
   }
-
-
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
