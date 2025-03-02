@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '/models/student.dart';
 import '../routes/student.routes.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class UserSelectionScreen extends StatefulWidget {
   @override
@@ -10,6 +11,23 @@ class UserSelectionScreen extends StatefulWidget {
 
 class _UserSelectionScreenState extends State<UserSelectionScreen> {
   String? _selectedUserType;
+
+  @override
+  void initState(){
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  void _checkLoginStatus() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if(user != null){
+      //Usuario já logado
+      Future.microtask((){
+        print(FirebaseAuth.instance.currentUser);
+        Navigator.restorablePushReplacementNamed(context, '/dashboardAdmin');
+      });
+    }
+  }
 
   void _navigateToLogin() {
     if (_selectedUserType != null) {
