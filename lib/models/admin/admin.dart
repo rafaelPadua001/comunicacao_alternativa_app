@@ -16,7 +16,7 @@ class AdminModel {
 
   // Função para sair
   Future<void> logout() async {
-    await _firebaseAuth.signOut();
+    await FirebaseAuth.instance.signOut();
   }
 
   // Função para verificar se o usuário está logado

@@ -7,6 +7,9 @@ import '../screens/addPictogramScreen.dart';
 import '../screens/userselectionScreen.dart';
 import '../models/pictogram.dart';
 import '../models/student.dart';
+import '../models/admin/admin.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PictogramCard extends StatefulWidget {
   @override
@@ -16,6 +19,7 @@ class PictogramCard extends StatefulWidget {
 class _PictogramCardState extends State<PictogramCard> {
   final Pictogramstorage _storage = Pictogramstorage();
   final FlutterTts flutterTts = FlutterTts()..setLanguage('en-US');
+  final AdminModel _adminModel = AdminModel();
 
   List<Pictogram> _hivePictograms = [];
   List<bool> _selectedItems = [];
@@ -86,6 +90,61 @@ class _PictogramCardState extends State<PictogramCard> {
   Future<void> _speak(String text) async {
     await flutterTts.speak(text);
   }
+
+  //Função para captura do tipo de usuario para realizar logou
+Future<void> _handleLogout() async {
+  print("Logout clicado");
+  print("Tentando fazer logout...");
+
+  final user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    print("Usuário logado: ${user.email}");
+
+    try {
+      // Buscar tipo de usuário no Firestore
+      final userDoc = await FirebaseFirestore.instance
+          .collection('admin')
+          .doc(user.uid)
+          .get();
+
+      if (userDoc.exists) {
+        final userType = userDoc.data()?['userType'];  // Aqui você pega o tipo de usuário do Firestore
+        if (userType != null) {
+          print("Tipo de usuário: $userType");
+
+          // Realizar o logout
+          await FirebaseAuth.instance.signOut();
+          print("Logout realizado!");
+
+          // Redirecionamento conforme o tipo de usuário
+          if (userType == 'admin') {
+            print("Redirecionando admin...");
+            Navigator.pushReplacementNamed(context, '/loginAdmin');
+          } else if (userType == 'student') {
+            print("Redirecionando student...");
+            Navigator.pushReplacementNamed(context, '/loginStudent');
+          } else if (userType == 'professor') {
+            print("Redirecionando professor...");
+            Navigator.pushReplacementNamed(context, '/loginProfessor');
+          } else {
+            print("Redirecionando para userSelection...");
+            Navigator.pushReplacementNamed(context, '/userSelection');
+          }
+        } else {
+          print("Erro: campo 'userType' não encontrado.");
+        }
+      } else {
+        print("Erro: Documento do usuário não encontrado.");
+      }
+    } catch (e) {
+      print("Erro ao buscar usuário no Firestore: $e");
+    }
+  } else {
+    print("Nenhum usuário logado.");
+  }
+}
+
+
 
   // Função para agrupar pictogramas por categoria
   Map<String, List<Pictogram>> _groupPictogramsByCategory(List<Pictogram> pictograms) {
@@ -220,18 +279,21 @@ class _PictogramCardState extends State<PictogramCard> {
         title: Text("Comunicação Alternativa"),
         actions: <Widget>[
           PopupMenuButton<String>(
-            onSelected: (String result) {
+            onSelected: (String result) async {
               if (result == 'add_image') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => AddPictogramScreen()),
                 ).then((_) => _loadPictograms()); // Atualiza após adicionar
               }
-              if(result == 'account'){
+              if(result == 'dashboard'){
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => UserSelectionScreen()),
                 );
+              }
+              if(result == 'logout'){
+                await _handleLogout();
               }
             },
             itemBuilder:
@@ -247,22 +309,22 @@ class _PictogramCardState extends State<PictogramCard> {
                     ),
                   ),
                   PopupMenuItem<String>(
-                    value: 'account',
+                    value: 'dashboard',
                     child: Row(
                       children: [
-                        Icon(Icons.settings),
+                        Icon(Icons.dashboard),
                         SizedBox(width: 10),
-                        Text('Account'),
+                        Text('Dashboard'),
                       ],
                     ),
                   ),
                   PopupMenuItem<String>(
-                    value: 'Opção 3',
+                    value: 'logout',
                     child: Row(
                       children: [
-                        Icon(Icons.help),
+                        Icon(Icons.logout),
                         SizedBox(width: 10),
-                        Text('Opção 3'),
+                        Text('logout'),
                       ],
                     ),
                   ),

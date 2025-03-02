@@ -8,21 +8,20 @@ class UserSelectionScreen extends StatefulWidget {
   _UserSelectionScreenState createState() => _UserSelectionScreenState();
 }
 
-
 class _UserSelectionScreenState extends State<UserSelectionScreen> {
   String? _selectedUserType;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     _checkLoginStatus();
   }
 
   void _checkLoginStatus() async {
     final user = FirebaseAuth.instance.currentUser;
-    if(user != null){
+    if (user != null) {
       //Usuario já logado
-      Future.microtask((){
+      Future.microtask(() {
         print(FirebaseAuth.instance.currentUser);
         Navigator.restorablePushReplacementNamed(context, '/dashboardAdmin');
       });
@@ -44,9 +43,7 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
       }
     }
   }
-
-
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
