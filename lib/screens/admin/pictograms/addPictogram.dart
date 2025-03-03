@@ -1,6 +1,9 @@
+import 'package:comunicacao_alternativa_app/services/supabase_config.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import '../../../data/pictograms/pictogramStorage.dart';
+import '../../../services/supabase_config.dart';
 
 class AddPictogram extends StatefulWidget {
   @override
@@ -11,7 +14,9 @@ class _AddPictogramState extends State<AddPictogram> {
   File? _image;
   final TextEditingController _labelController = TextEditingController();
   String? _selectedCategory;
-  final List<String> categories = ["Animals", "Objects", "People", "Nature"];
+  final List<String> categories = ["Animals", "Objects", "People", "Nature", "Fruit", "Drink"];
+  final PictogramStorage _pictogramStorage = PictogramStorage();
+  bool _isUploading = false;
 
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -22,11 +27,44 @@ class _AddPictogramState extends State<AddPictogram> {
     }
   }
 
-  void _savePictogram() {
-    if (_image != null && _labelController.text.isNotEmpty && _selectedCategory != null) {
-      print("Pictogram saved: ${_labelController.text}, Category: $_selectedCategory");
-    } else {
-      print("Please select an image, enter a name, and choose a category.");
+  void _savePictogram() async {
+     if (_image == null || _labelController.text.isEmpty || _selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Preencha todos os campos e selecione uma imagem")),
+      );
+      return;
+    }
+
+    setState(() => _isUploading = true);
+
+    try {
+      // 1️⃣ Faz upload da imagem para o Supabase Storage
+      final String? imageUrl = await PictogramStorage.uploadImage(_image!);
+      if (imageUrl == null) throw Exception("Falha no upload da imagem");
+
+      // 2️⃣ Salva os dados no banco
+      final bool isSaved = await PictogramStorage.savePictogram(
+        _labelController.text,
+        _selectedCategory!,
+        imageUrl,
+      );
+
+      if (isSaved) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Pictograma salvo!")));
+        setState(() {
+          _image = null;
+          _labelController.clear();
+          _selectedCategory = null;
+          _isUploading = false;
+        });
+      } else {
+        throw Exception("Erro ao salvar no banco");
+      }
+    } catch (error) {
+      setState(() => _isUploading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Erro: $error")),
+      );
     }
   }
 

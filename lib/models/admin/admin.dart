@@ -1,26 +1,35 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../services/supabase_config.dart';
 
 class AdminModel {
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  // final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+
+  final SupabaseClient _supabase = SupabaseConfig.supabase;
 
   // Função para fazer login
-  Future<UserCredential?> loginWithEmailPassword(String email, String password) async {
-    try {
-      return await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
-    } on FirebaseAuthException catch (e) {
-      // Aqui você pode capturar o erro e exibir mensagens personalizadas
-      throw e.message ?? "Erro ao fazer login";
-    }
+  Future<AuthResponse?> loginWithEmailPassword(String email, String password) async {
+  try {
+    final response = await _supabase.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
+    print("Login bem-sucedido: ${response.user?.id}");
+    return response;
+  } catch (e, stacktrace) {
+    print("Erro ao fazer login: $e");
+    print("Stacktrace: $stacktrace");
+    return null;
   }
+}
 
   // Função para sair
   Future<void> logout() async {
-    await FirebaseAuth.instance.signOut();
+    await _supabase.auth.signOut();
   }
 
   // Função para verificar se o usuário está logado
   User? getCurrentUser() {
-    return _firebaseAuth.currentUser;
+    return _supabase.auth.currentUser;
   }
 }
