@@ -1,12 +1,15 @@
 import 'settings.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+import '../../services/supabase_config.dart';
 
 class DashboarAdmindScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Obter o usuário logado
-    final user = FirebaseAuth.instance.currentUser;
+    final user = SupabaseConfig.supabase.auth.currentUser;
+
+
 
     return Scaffold(
       appBar: AppBar(

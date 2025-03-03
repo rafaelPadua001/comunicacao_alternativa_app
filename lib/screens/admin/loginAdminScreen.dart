@@ -6,6 +6,7 @@ class LoginAdminScreen extends StatelessWidget {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final AdminModel _adminModel = AdminModel();
+  
   void _validate(BuildContext context) async {
     final email = _emailController.text;
     final password = _passwordController.text;

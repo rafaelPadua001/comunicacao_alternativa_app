@@ -13,6 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'widgets/pictogram_card.dart' as widget;
 import 'models/student.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'services/supabase_config.dart'; // Importando a configuração
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,6 +37,11 @@ void main() async {
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+   await Supabase.initialize(
+    url: SupabaseConfig.supabaseUrl,
+    anonKey: SupabaseConfig.supabaseAnonKey,
   );
   runApp(const MyApp());
 }
