@@ -48,4 +48,26 @@ class PictogramStorage {
       return false;
     }
   }
+
+static Future<List<Pictogram>> getPictograms() async {
+  try {
+    final response = await SupabaseConfig.supabase
+        .from('pictograms_table')
+        .select();
+
+    // Verifique se a resposta contém a chave 'data'
+    if (response != null && response is List) {
+      List<Pictogram> pictograms = response
+          .map<Pictogram>((data) => Pictogram.fromJson(data))
+          .toList();
+      return pictograms;
+    } else {
+      print("Formato de resposta inválido ou vazio");
+      return [];
+    }
+  } catch (error) {
+    print("Erro ao buscar pictogramas: $error");
+    return [];
+  }
+}
 }

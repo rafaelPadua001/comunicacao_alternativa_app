@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class Pictogram {
   final String id;
   final String label;
@@ -14,25 +12,27 @@ class Pictogram {
     required this.imageUrl,
     required this.createdAt,
   });
-
-  //Conver object to map
-  Map<String, dynamic> toMap(){
-    return{
+ 
+  // Converte um objeto para um mapa JSON (para salvar no Supabase)
+  Map<String, dynamic> toMap() {
+    return {
       'label': label,
       'category': category,
       'imageUrl': imageUrl,
-      'created_at': createdAt,
+      'created_at': createdAt.toIso8601String(), // ISO 8601 (compatível com Supabase)
     };
   }
 
-  //Convert Map to Object pictogram
-  factory Pictogram.fromMap(String id, Map<String, dynamic> map) {
+ 
+
+  // Método para converter JSON do Supabase para um objeto Pictogram
+  factory Pictogram.fromJson(Map<String, dynamic> json) {
     return Pictogram(
-      id: id,
-      label: map['label'] ?? '',
-      category: map['category'] ?? '',
-      imageUrl: map['imageUrl'] ?? '',
-      createdAt: (map['created_at'] as Timestamp).toDate(),
+      id: json['id'] ?? '',
+      label: json['label'] ?? '',
+      category: json['category'] ?? '',
+      imageUrl: json['imageUrl'] ?? '',
+      createdAt: DateTime.parse(json['created_at']), // Supabase retorna string ISO
     );
   }
 }

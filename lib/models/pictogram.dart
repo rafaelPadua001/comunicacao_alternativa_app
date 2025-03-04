@@ -24,4 +24,12 @@ class Pictogram {
     required this.category,
     this.isLocal = false,  // Adicionando valor padrão para isLocal
   });
+
+  factory Pictogram.fromJson(Map<String, dynamic> json) {
+    return Pictogram(
+      imagePath: json['imagePath'].toString(),  // Convertendo para String caso necessário
+      label: json['label'].toString(),  // Convertendo para String caso necessário
+      category: json['category'].toString(),
+    );
+  }
 }
