@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:comunicacao_alternativa_app/services/supabase_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -93,56 +94,54 @@ class _PictogramCardState extends State<PictogramCard> {
 
   //Função para captura do tipo de usuario para realizar logou
 Future<void> _handleLogout() async {
-  print("Logout clicado");
-  print("Tentando fazer logout...");
+  final user = SupabaseConfig.supabase.auth.currentUser;
 
-  final user = FirebaseAuth.instance.currentUser;
   if (user != null) {
     print("Usuário logado: ${user.email}");
 
     try {
-      // Buscar tipo de usuário no Firestore
-      final userDoc = await FirebaseFirestore.instance
-          .collection('admin')
-          .doc(user.uid)
-          .get();
+      // Buscar o tipo de usuário na tabela 'user_profiles'
+     final response = await SupabaseConfig.supabase
+      .from('user_profiles')
+      .select('usertype') // ALTERADO para minúsculo
+      .eq('id', user.id)
+      .maybeSingle();
 
-      if (userDoc.exists) {
-        final userType = userDoc.data()?['userType'];  // Aqui você pega o tipo de usuário do Firestore
-        if (userType != null) {
-          print("Tipo de usuário: $userType");
 
-          // Realizar o logout
-          await FirebaseAuth.instance.signOut();
-          print("Logout realizado!");
+      if (response != null && response.containsKey('usertype')) {
+        final String userType = response['usertype'];
+        print("Tipo de usuário: $userType");
 
-          // Redirecionamento conforme o tipo de usuário
-          if (userType == 'admin') {
-            print("Redirecionando admin...");
+        // Logout no Supabase
+        await SupabaseConfig.supabase.auth.signOut();
+        print("Logout realizado!");
+
+        // Redirecionamento correto
+        switch (userType) {
+          case 'admin':
             Navigator.pushReplacementNamed(context, '/loginAdmin');
-          } else if (userType == 'student') {
-            print("Redirecionando student...");
+            break;
+          case 'student':
             Navigator.pushReplacementNamed(context, '/loginStudent');
-          } else if (userType == 'professor') {
-            print("Redirecionando professor...");
+            break;
+          case 'professor':
             Navigator.pushReplacementNamed(context, '/loginProfessor');
-          } else {
-            print("Redirecionando para userSelection...");
+            break;
+          default:
             Navigator.pushReplacementNamed(context, '/userSelection');
-          }
-        } else {
-          print("Erro: campo 'userType' não encontrado.");
+            break;
         }
       } else {
-        print("Erro: Documento do usuário não encontrado.");
+        print("Erro: campo 'userType' não encontrado.");
       }
     } catch (e) {
-      print("Erro ao buscar usuário no Firestore: $e");
+      print("Erro ao buscar usuário no Supabase: $e");
     }
   } else {
     print("Nenhum usuário logado.");
   }
 }
+
 
 
 
