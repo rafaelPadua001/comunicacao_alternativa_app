@@ -1,7 +1,9 @@
+import 'package:comunicacao_alternativa_app/services/supabase_config.dart';
 import 'package:flutter/material.dart';
 import '/models/student.dart';
 import '../routes/student.routes.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+
 
 class UserSelectionScreen extends StatefulWidget {
   @override
@@ -17,16 +19,17 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
     _checkLoginStatus();
   }
 
-  void _checkLoginStatus() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      //Usuario já logado
-      Future.microtask(() {
-        print(FirebaseAuth.instance.currentUser);
-        Navigator.restorablePushReplacementNamed(context, '/dashboardAdmin');
-      });
-    }
+void _checkLoginStatus() async {
+  final user = SupabaseConfig.supabase.auth.currentUser;
+  if (user != null) {
+    // Usuário já logado
+    Future.microtask(() {
+      print(user);
+      Navigator.restorablePushReplacementNamed(context, '/dashboardAdmin');
+    });
   }
+}
+
 
   void _navigateToLogin() {
     if (_selectedUserType != null) {

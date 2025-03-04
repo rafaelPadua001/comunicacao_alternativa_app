@@ -15,11 +15,48 @@ class AdminModel {
       password: password,
     );
     print("Login bem-sucedido: ${response.user?.id}");
+
+    final userId = response.user?.id;
+    final userEmail = response.user?.email;
+    final userType = 'admin';
+
+    final createProfile = createUserProfile(userId!, userEmail!, userType);
+
     return response;
   } catch (e, stacktrace) {
     print("Erro ao fazer login: $e");
     print("Stacktrace: $stacktrace");
     return null;
+  }
+}
+
+  Future<void> createUserProfile(String userId, String userEmail, String userType) async {
+  final response = await SupabaseConfig.supabase.from('user_profiles').insert([
+    {
+      'id': userId, // ID do usuário, que é o user_id do Supabase
+      'displayName': 'Admin',
+      'email': userEmail,
+      'photoUrl': '',
+      'userType': userType,  // Nível de acesso (admin, student, professor)
+    }
+  ]);
+
+  if (response.error != null) {
+    print('Erro ao criar perfil: ${response.error?.message}');
+  } else {
+    print('Perfil criado com sucesso');
+  }
+}
+
+Future<void> updateUserProfile(String userId, String newRole) async {
+  final response = await SupabaseConfig.supabase.from('user_profiles').update({
+    'role': newRole,
+  }).eq('id', userId);
+
+  if (response.error != null) {
+    print('Erro ao atualizar perfil: ${response.error?.message}');
+  } else {
+    print('Perfil atualizado com sucesso');
   }
 }
 
