@@ -7,10 +7,11 @@ import '../data/pictogramStorage.dart';
 import '../screens/addPictogramScreen.dart';
 import '../screens/userselectionScreen.dart';
 import '../models/pictogram.dart';
+import '../models/pictograms/pictogram.dart' as adminPictogram;
 import '../models/student.dart';
 import '../models/admin/admin.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PictogramCard extends StatefulWidget {
   @override
@@ -24,6 +25,7 @@ class _PictogramCardState extends State<PictogramCard> {
 
   List<Pictogram> _hivePictograms = [];
   List<bool> _selectedItems = [];
+  List<Pictogram> _supabasePictograms = [];
 
   // Lista de pictogramas locais
   final List<Pictogram> pictograms = [
@@ -73,80 +75,113 @@ class _PictogramCardState extends State<PictogramCard> {
   // Função para carregar pictogramas do Hive
   Future<void> _loadPictograms() async {
     try {
-      final hivePictograms = await _storage.getPictograms(); // Recupera a lista de pictogramas do Hive
+      final hivePictograms =
+          await _storage.getPictograms(); // Pictogramas do Hive
+
       setState(() {
         _hivePictograms = List<Pictogram>.from(hivePictograms);
-        // Atualiza a lista de itens selecionados com o comprimento correto
-        _selectedItems = List.filled(
-          pictograms.length + _hivePictograms.length,
-          false,
-        );
       });
+
+      await _loadSupabasePictograms(); // Carregar pictogramas do Supabase
     } catch (e) {
       print("Erro ao carregar pictogramas: $e");
     }
   }
-  
+
+  //load pictograms supabase
+  Future<void> _loadSupabasePictograms() async {
+    try {
+      final response = await SupabaseConfig.supabase
+          .from('pictograms_table')
+          .select('*');
+
+      if (response != null) {
+        List<Pictogram> supabasePictograms =
+            response.map<Pictogram>((pictogramData) {
+              return Pictogram(
+                imagePath:
+                    pictogramData['imageUrl'], // URL da imagem no Supabase
+                label: pictogramData['label'],
+                category: pictogramData['category'],
+                isLocal:
+                    false, // Para diferenciar os pictogramas locais dos remotos
+              );
+            }).toList();
+
+        setState(() {
+          _supabasePictograms = supabasePictograms;
+          _selectedItems = List.filled(
+            pictograms.length +
+                _hivePictograms.length +
+                _supabasePictograms.length,
+            false,
+          );
+        });
+      }
+    } catch (e) {
+      print("Erro ao carregar pictogramas do Supabase: $e");
+    }
+  }
+
   // Função para falar o texto
   Future<void> _speak(String text) async {
     await flutterTts.speak(text);
   }
 
   //Função para captura do tipo de usuario para realizar logou
-Future<void> _handleLogout() async {
-  final user = SupabaseConfig.supabase.auth.currentUser;
+  Future<void> _handleLogout() async {
+    final user = SupabaseConfig.supabase.auth.currentUser;
 
-  if (user != null) {
-    print("Usuário logado: ${user.email}");
+    if (user != null) {
+      print("Usuário logado: ${user.email}");
 
-    try {
-      // Buscar o tipo de usuário na tabela 'user_profiles'
-     final response = await SupabaseConfig.supabase
-      .from('user_profiles')
-      .select('usertype') // ALTERADO para minúsculo
-      .eq('id', user.id)
-      .maybeSingle();
+      try {
+        // Buscar o tipo de usuário na tabela 'user_profiles'
+        final response =
+            await SupabaseConfig.supabase
+                .from('user_profiles')
+                .select('usertype') // ALTERADO para minúsculo
+                .eq('id', user.id)
+                .maybeSingle();
 
+        if (response != null && response.containsKey('usertype')) {
+          final String userType = response['usertype'];
+          print("Tipo de usuário: $userType");
 
-      if (response != null && response.containsKey('usertype')) {
-        final String userType = response['usertype'];
-        print("Tipo de usuário: $userType");
+          // Logout no Supabase
+          await SupabaseConfig.supabase.auth.signOut();
+          print("Logout realizado!");
 
-        // Logout no Supabase
-        await SupabaseConfig.supabase.auth.signOut();
-        print("Logout realizado!");
-
-        // Redirecionamento correto
-        switch (userType) {
-          case 'admin':
-            Navigator.pushReplacementNamed(context, '/loginAdmin');
-            break;
-          case 'student':
-            Navigator.pushReplacementNamed(context, '/loginStudent');
-            break;
-          case 'professor':
-            Navigator.pushReplacementNamed(context, '/loginProfessor');
-            break;
-          default:
-            Navigator.pushReplacementNamed(context, '/userSelection');
-            break;
+          // Redirecionamento correto
+          switch (userType) {
+            case 'admin':
+              Navigator.pushReplacementNamed(context, '/loginAdmin');
+              break;
+            case 'student':
+              Navigator.pushReplacementNamed(context, '/loginStudent');
+              break;
+            case 'professor':
+              Navigator.pushReplacementNamed(context, '/loginProfessor');
+              break;
+            default:
+              Navigator.pushReplacementNamed(context, '/userSelection');
+              break;
+          }
+        } else {
+          print("Erro: campo 'userType' não encontrado.");
         }
-      } else {
-        print("Erro: campo 'userType' não encontrado.");
+      } catch (e) {
+        print("Erro ao buscar usuário no Supabase: $e");
       }
-    } catch (e) {
-      print("Erro ao buscar usuário no Supabase: $e");
+    } else {
+      print("Nenhum usuário logado.");
     }
-  } else {
-    print("Nenhum usuário logado.");
   }
-}
-
-
-
 
   // Função para agrupar pictogramas por categoria
-  Map<String, List<Pictogram>> _groupPictogramsByCategory(List<Pictogram> pictograms) {
+  Map<String, List<Pictogram>> _groupPictogramsByCategory(
+    List<Pictogram> pictograms,
+  ) {
     Map<String, List<Pictogram>> groupedPictograms = {};
 
     for (var pictogram in pictograms) {
@@ -177,15 +212,13 @@ Future<void> _handleLogout() async {
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Text(
                 category,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
             GridView.builder(
               shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(), // Desabilita o scroll interno
+              physics:
+                  NeverScrollableScrollPhysics(), // Desabilita o scroll interno
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
                 childAspectRatio: 1,
@@ -211,21 +244,28 @@ Future<void> _handleLogout() async {
                     });
                   },
                   child: Card(
-                    color: _selectedItems[allPictograms.indexOf(pictogram)]
-                        ? Colors.green
-                        : Colors.white,
+                    color:
+                        _selectedItems[allPictograms.indexOf(pictogram)]
+                            ? Colors.green
+                            : Colors.white,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         pictogram.isLocal
                             ? Image.file(
-                                File(pictogram.imagePath),
-                                height: 50,
-                              ) // Para imagens locais
+                              File(pictogram.imagePath),
+                              height: 50,
+                            ) // Para imagens locais
+                            : pictogram.imagePath.startsWith('http')
+                            ? Image.network(
+                              pictogram
+                                  .imagePath, // Para imagens remotas (URLs)
+                              height: 50,
+                            )
                             : Image.asset(
-                                pictogram.imagePath,
-                                height: 50,
-                              ), // Para imagens embutidas
+                              pictogram.imagePath,
+                              height: 50,
+                            ), // Para imagens embutidas
                         SizedBox(height: 10),
                         Text(
                           pictogram.label,
@@ -249,7 +289,11 @@ Future<void> _handleLogout() async {
   @override
   Widget build(BuildContext context) {
     // Combina as listas de pictogramas locais e do Hive
-    final allPictograms = [...pictograms, ..._hivePictograms];
+    final allPictograms = [
+      ...pictograms,
+      ..._hivePictograms,
+      ..._supabasePictograms,
+    ];
 
     // Verifica se a lista de pictogramas está vazia
     if (allPictograms.isEmpty) {
@@ -285,13 +329,15 @@ Future<void> _handleLogout() async {
                   MaterialPageRoute(builder: (context) => AddPictogramScreen()),
                 ).then((_) => _loadPictograms()); // Atualiza após adicionar
               }
-              if(result == 'dashboard'){
+              if (result == 'dashboard') {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => UserSelectionScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => UserSelectionScreen(),
+                  ),
                 );
               }
-              if(result == 'logout'){
+              if (result == 'logout') {
                 await _handleLogout();
               }
             },
@@ -332,11 +378,7 @@ Future<void> _handleLogout() async {
         ],
       ),
       body: Column(
-        children: [
-          Expanded(
-            child: _buildPictogramList(allPictograms),
-          ),
-        ],
+        children: [Expanded(child: _buildPictogramList(allPictograms))],
       ),
     );
   }
