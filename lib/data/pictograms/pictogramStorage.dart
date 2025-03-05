@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 // import 'package:firebase_storage/firebase_storage.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:path/path.dart' as path;
 import '../../models/pictograms/pictogram.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -54,7 +54,7 @@ static Future<List<Pictogram>> getPictograms() async {
     final response = await SupabaseConfig.supabase
         .from('pictograms_table')
         .select();
-
+    print(response);
     // Verifique se a resposta contém a chave 'data'
     if (response != null && response is List) {
       List<Pictogram> pictograms = response
@@ -70,4 +70,5 @@ static Future<List<Pictogram>> getPictograms() async {
     return [];
   }
 }
+
 }

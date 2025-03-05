@@ -16,6 +16,7 @@ class Pictogram {
   // Converte um objeto para um mapa JSON (para salvar no Supabase)
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'label': label,
       'category': category,
       'imageUrl': imageUrl,
@@ -28,11 +29,13 @@ class Pictogram {
   // Método para converter JSON do Supabase para um objeto Pictogram
   factory Pictogram.fromJson(Map<String, dynamic> json) {
     return Pictogram(
-      id: json['id'] ?? '',
-      label: json['label'] ?? '',
-      category: json['category'] ?? '',
+      id: json['id']?.toString() ?? '',
+      label: json['label'] ?? 'sem nome',
+      category: json['category'] ?? 'sem categoria',
       imageUrl: json['imageUrl'] ?? '',
-      createdAt: DateTime.parse(json['created_at']), // Supabase retorna string ISO
+      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at']) ?? DateTime.now()
+      : DateTime.now(),
+       // Supabase retorna string ISO
     );
   }
 }
