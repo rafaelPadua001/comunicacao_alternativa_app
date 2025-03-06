@@ -21,8 +21,13 @@ class PictogramStorage {
           .from(bucketName)
           .upload(fileName, image);
 
+      final publicUrl = SupabaseConfig.supabase.storage
+      .from(bucketName)
+      .getPublicUrl(fileName);
+
       //url public file
-      return '${SupabaseConfig.supabaseUrl}/storage/v1/object/public/pictograms/$fileName';
+      // return '${SupabaseConfig.supabaseUrl}/storage/v1/object/public/pictograms/$fileName';
+      return publicUrl;
     } catch (e) {
       print('Erro ao fazer uploadd da imagem: $e');
       return null;
@@ -71,49 +76,54 @@ class PictogramStorage {
     }
   }
 
- static Future<void> deletePictograms(List<String> imageNames) async {
-  for (var image in imageNames) {
+static Future<void> deletePictograms(List<String> imageUrls) async {
+  for (var imageUrl in imageUrls) {
     try {
-      final uri = Uri.parse(image);
-      final imagePath = uri.pathSegments.last;
-      final fullPath = 'pictograms/$imagePath';
+      // 1. Extrai o nome da imagem a partir da URL completa
+      final uri = Uri.parse(imageUrl);
+      final imageName = uri.pathSegments.last; // Obtém o nome do arquivo (ex: 1741274611930.jpg)
 
+      // 2. Constrói o caminho relativo no formato esperado pelo Supabase Storage
+      final correctedPath = 'pictograms/$imageName'.replaceAll('//', '/'); // Substitui qualquer barra extra por uma barra simples
+
+      print('Caminho corrigido para o arquivo: $correctedPath');
+
+      // 3. Remove o registro da tabela no banco de dados
       final response = await SupabaseConfig.supabase
           .from('pictograms_table')  // Certifique-se de que o nome da tabela está correto
           .delete()
-          .eq('imageUrl', image)
+          .eq('imageUrl', imageUrl)  // Certifique-se de que o campo imageUrl está correto
           .select();  // A consulta precisa retornar algo, pode ser uma confirmação
 
-      if (response == null) {
-        print('Erro ao tentar deletar a imagem $image: resposta nula');
-        continue;
-      }
-
-      // Verifique se houve algum erro
       if (response.isEmpty) {
         // Se a resposta estiver vazia, significa que nenhum registro foi deletado
-        print('Nenhum registro encontrado para a imagem $image');
+        print('Nenhum registro encontrado para a imagem $imageUrl');
       } else {
         // Se a resposta não estiver vazia, a deleção foi bem-sucedida
-        print('Imagem $image deletada com sucesso!');
+        print('Imagem $imageUrl deletada do banco de dados com sucesso!');
       }
 
+      // 4. Tenta remover o arquivo do storage diretamente
       final storageResponse = await SupabaseConfig.supabase.storage
-      .from('pictograms')
-      .remove([fullPath]);
+          .from('pictograms')  // Nome do bucket
+          .remove([correctedPath]); // Caminho corrigido do arquivo
 
+      // Diagnóstico: Imprimir resposta completa
+      print('Resposta do Supabase: $storageResponse');
 
-      if(storageResponse.isEmpty){
-        print('Erro ao tentar deletar a imagem $image do storage ${storageResponse}');
+      if (storageResponse.isEmpty) {
+        // Se a lista de arquivos removidos estiver vazia, significa que nenhum arquivo foi removido
+        print('Erro ao deletar imagem do storage: A imagem não foi removida');
+      } else {
+        // Se a lista não estiver vazia, a remoção foi bem-sucedida
+        print('Imagem $correctedPath removida do storage com sucesso!');
       }
-      else{
-        print('$image removida do storage com sucesso');
-      }
+
     } catch (e) {
-      print('Erro ao tentar deletar a imagem $image: $e');
+      print('Erro ao tentar deletar a imagem $imageUrl: $e');
     }
   }
-  print('Delete disparado');
+  print('Delete finalizado.');
 }
 
 }
