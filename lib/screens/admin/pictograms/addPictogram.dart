@@ -4,6 +4,7 @@ import 'dart:io';
 import '../../../data/pictograms/pictogramStorage.dart' as adminPictogram;
 import '../../../data/pictogramStorage.dart' as localPictogram;
 import '../../../models/pictogram.dart';
+import '../../../services/delete_pictograms.dart';
 
 class AddPictogram extends StatefulWidget {
   @override
@@ -27,6 +28,11 @@ class _AddPictogramState extends State<AddPictogram> {
   bool _isLoading = true;
   bool _isSelecting = false;
   Set<int> _selectedIndex = {};
+  List<String> cloudImages = [];
+  List<String> localImages = [];
+
+  late final DeletePictograms _deletePictograms;
+ 
 
   List<Map<String, dynamic>> _allPictograms = [];
   final localPictogramStorage = localPictogram.Pictogramstorage();
@@ -115,6 +121,28 @@ class _AddPictogramState extends State<AddPictogram> {
 
   void  _deleteSelectedItems(Set<int> index){
     print(index);
+    _isLoading = true;
+    List<int> indexesToRemove = index.toList()..sort((a, b) => b.compareTo(a)); //order to remove first to last
+
+    for(int indexSet in indexesToRemove){
+      var pictogram = _allPictograms[indexSet];
+
+      if(pictogram['isLocal']){
+      _deletePictograms.deleteLocalImages(pictogram['imagePath']);
+      }
+      else{
+        _deletePictograms.deleteCloudImages(pictogram['imageUrl']);
+      }
+
+      _allPictograms.removeAt(indexSet);
+    }
+
+    setState(() {
+      _selectedIndex.clear();
+ 
+    });
+    _isLoading = false;
+    print('Imagens removidas com sucesso');
   }
   Future<void> _loadPictograms() async {
     setState(() => _isLoading = true);
@@ -169,6 +197,10 @@ class _AddPictogramState extends State<AddPictogram> {
   void initState() {
     super.initState();
     _loadPictograms();
+    _deletePictograms = DeletePictograms(
+      cloudImages: cloudImages,
+      localImages: localImages,
+    );
   }
 
   @override
@@ -255,7 +287,7 @@ class _AddPictogramState extends State<AddPictogram> {
               ),
               Card(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(0),
+                  // borderRadius: BorderRadius.circular(10),
                 ),
                 elevation: 4,
                 child: ExpansionTile(
