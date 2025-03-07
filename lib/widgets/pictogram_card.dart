@@ -19,7 +19,7 @@ class PictogramCard extends StatefulWidget {
 
 class _PictogramCardState extends State<PictogramCard> {
   final Pictogramstorage _storage = Pictogramstorage();
-  final FlutterTts flutterTts = FlutterTts()..setLanguage('en-US');
+  final FlutterTts flutterTts = FlutterTts();
   final AdminModel _adminModel = AdminModel();
 
   List<Pictogram> _hivePictograms = [];
