@@ -1,4 +1,5 @@
 import 'package:comunicacao_alternativa_app/screens/admin/pictograms/addPictogram.dart';
+import 'package:flutter/material.dart';
 import '../data/pictograms/pictogramStorage.dart' as adminPictograms;
 import '../data/pictogramStorage.dart' as localPictograms;
 
@@ -16,10 +17,10 @@ class DeletePictograms {
     print('Image $imageNames removida do armazenamento local');
   }
 
-  void deleteCloudImages(dynamic imageNames){
+  void deleteCloudImages(BuildContext context, dynamic imageNames){
     List<String> imagesToDelete = (imageNames is String) ? [imageNames] : List<String>.from(imageNames);
 
-    adminPictograms.PictogramStorage.deletePictograms(imagesToDelete);
+    adminPictograms.PictogramStorage.deletePictograms(context, imagesToDelete);
     for(var imageName in imagesToDelete){
       print('Image $imageName removida da nuvem');
     }

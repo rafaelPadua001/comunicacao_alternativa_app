@@ -131,7 +131,7 @@ class _AddPictogramState extends State<AddPictogram> {
       _deletePictograms.deleteLocalImages(pictogram['imagePath']);
       }
       else{
-        _deletePictograms.deleteCloudImages(pictogram['imageUrl']);
+        _deletePictograms.deleteCloudImages(context, pictogram['imageUrl']);
       }
 
       _allPictograms.removeAt(indexSet);
