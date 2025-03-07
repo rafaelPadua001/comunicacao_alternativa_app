@@ -52,17 +52,7 @@ class Pictogramstorage {
     // Remove os itens do Hive usando as chaves corretas
     if (keysToDelete.isNotEmpty) {
       await _box!.deleteAll(keysToDelete);
-      print('Pictogramas removidos do Hive.');
-    } else {
-      print('Nenhum pictograma encontrado no Hive para remoção.');
-    }
-
-    // Remove os arquivos do armazenamento local
-    for (String path in imagePaths) {
-      File file = File(path);
-      if (await file.exists()) {
-        await file.delete();
-      }
+     
     }
 
     await _box!.compact();
