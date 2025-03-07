@@ -4,8 +4,6 @@ import 'package:comunicacao_alternativa_app/screens/userselectionScreen.dart';
 import 'screens/student/loginStudentScreen.dart' as studentScreen;
 import 'screens/admin/loginAdminScreen.dart' as adminScreen;
 import 'screens/admin/dashboard.dart' as dasboardScreen;
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
 import 'models/pictogram.dart' as modelPictogram;
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -35,9 +33,9 @@ void main() async {
   await Hive.openBox<modelPictogram.Pictogram>('pictograms');
   await Hive.openBox<Student>('student');
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // await Firebase.initializeApp(
+  //   options: DefaultFirebaseOptions.currentPlatform,
+  // );
 
    await Supabase.initialize(
     url: SupabaseConfig.supabaseUrl,
