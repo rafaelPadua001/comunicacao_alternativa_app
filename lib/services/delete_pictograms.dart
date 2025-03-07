@@ -39,15 +39,3 @@ class DeletePictograms {
     print('Images cloud: $cloudImages');
   }
 }
-
-
-// void main(){
-//    var addPictograms = AddPictogram();
-
-//   var pictograms = DeletePictograms(
-//     localImages: addPictograms.getLocalImages(),
-//     cloudImages: addPictograms.getCloudImages(),
-//   );
-
-//   pictograms.showImages();
-// }
