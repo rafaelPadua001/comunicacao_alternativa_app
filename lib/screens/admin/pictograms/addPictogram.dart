@@ -32,7 +32,6 @@ class _AddPictogramState extends State<AddPictogram> {
   List<String> localImages = [];
 
   late final DeletePictograms _deletePictograms;
- 
 
   List<Map<String, dynamic>> _allPictograms = [];
   final localPictogramStorage = localPictogram.Pictogramstorage();
@@ -119,30 +118,54 @@ class _AddPictogramState extends State<AddPictogram> {
     });
   }
 
-  void  _deleteSelectedItems(Set<int> index){
-    _isLoading = true;
-    List<int> indexesToRemove = index.toList()..sort((a, b) => b.compareTo(a)); //order to remove first to last
+ void _deleteSelectedItems(Set<int> index) {
+  setState(() {
+    _isLoading = true; // Indicando que a remoção está em andamento
+  });
 
-    for(int indexSet in indexesToRemove){
-      var pictogram = _allPictograms[indexSet];
+  // Ordena os índices para que a remoção seja feita de trás para frente
+  List<int> indexesToRemove = index.toList()..sort((a, b) => b.compareTo(a));
 
-      if(pictogram['isLocal']){
-        _deletePictograms.deleteLocalImages(pictogram['imagePath']);
-      }
-      else{
-        _deletePictograms.deleteCloudImages(context, pictogram['imageUrl']);
-      }
-
-      _allPictograms.removeAt(indexSet);
+  // Cria uma lista com os caminhos das imagens que precisam ser excluídas
+  List<String> imagePathsToDelete = [];
+  
+  // Remover os pictogramas da lista e coletar os paths para exclusão
+  for (int indexSet in indexesToRemove) {
+    var pictogram = _allPictograms[indexSet];
+    String? imagePath = pictogram['imagePath'] ?? pictogram['imageUrl'];
+    
+    if (imagePath != null) {
+      imagePathsToDelete.add(imagePath);
     }
 
-    setState(() {
-      _selectedIndex.clear();
- 
-    });
-    _isLoading = false;
-    print('Imagens removidas com sucesso');
+    // Remover o pictograma da lista
+    if (pictogram['isLocal'] == true) {
+      _deletePictograms.deleteLocalImages(pictogram['imagePath']);
+    } else {
+      _deletePictograms.deleteCloudImages(context, pictogram['imageUrl']);
+    }
   }
+
+  // Agora, remova os pictogramas da lista original de uma vez, para evitar problemas de índice
+  setState(() {
+    _allPictograms.removeWhere((pictogram) =>
+        imagePathsToDelete.contains(pictogram['imagePath'] ?? pictogram['imageUrl']));
+    
+    // Limpar a seleção
+    _selectedIndex.clear();
+  });
+
+  // Forçar a atualização do estado da tela
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    setState(() {
+      _isLoading = false;
+    });
+  });
+
+  print('Imagens removidas com sucesso');
+}
+
+
   Future<void> _loadPictograms() async {
     setState(() => _isLoading = true);
     try {
