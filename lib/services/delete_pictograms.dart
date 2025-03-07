@@ -15,6 +15,9 @@ class DeletePictograms {
 
   void deleteLocalImages(dynamic imageNames){
     print('Image $imageNames removida do armazenamento local');
+    List<String> imagesToDelete = (imageNames is String) ? [imageNames] : List<String>.from(imageNames);
+
+    localPictograms.Pictogramstorage().deletePictograms(imagesToDelete);    
   }
 
   void deleteCloudImages(BuildContext context, dynamic imageNames){

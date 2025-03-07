@@ -29,4 +29,8 @@ class Pictogramstorage {
     await _initializeBox();  // Garante que o Box esteja aberto
     await _box!.clear();  // Limpa todos os dados armazenados no Box
   }
+
+  Future<void> deletePictograms(List<String> imagePath) async {
+    print('Remove Local images ${imagePath}');
+  }
 }

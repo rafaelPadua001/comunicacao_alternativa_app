@@ -120,7 +120,6 @@ class _AddPictogramState extends State<AddPictogram> {
   }
 
   void  _deleteSelectedItems(Set<int> index){
-    print(index);
     _isLoading = true;
     List<int> indexesToRemove = index.toList()..sort((a, b) => b.compareTo(a)); //order to remove first to last
 
@@ -128,7 +127,7 @@ class _AddPictogramState extends State<AddPictogram> {
       var pictogram = _allPictograms[indexSet];
 
       if(pictogram['isLocal']){
-      _deletePictograms.deleteLocalImages(pictogram['imagePath']);
+        _deletePictograms.deleteLocalImages(pictogram['imagePath']);
       }
       else{
         _deletePictograms.deleteCloudImages(context, pictogram['imageUrl']);
