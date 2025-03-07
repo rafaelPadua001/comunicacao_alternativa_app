@@ -10,8 +10,7 @@ import '../models/pictogram.dart';
 import '../models/pictograms/pictogram.dart' as adminPictogram;
 import '../models/student.dart';
 import '../models/admin/admin.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
+import '../widgets/set_language.dart';
 
 class PictogramCard extends StatefulWidget {
   @override
@@ -337,6 +336,12 @@ class _PictogramCardState extends State<PictogramCard> {
                   ),
                 );
               }
+              if (result == 'setLanguage') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SetLanguage()),
+                );
+              }
               if (result == 'logout') {
                 await _handleLogout();
               }
@@ -360,6 +365,16 @@ class _PictogramCardState extends State<PictogramCard> {
                         Icon(Icons.dashboard),
                         SizedBox(width: 10),
                         Text('Dashboard'),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'setLanguage',
+                    child: Row(
+                      children: [
+                        Icon(Icons.settings_voice),
+                        SizedBox(width: 10),
+                        Text('set Language'),
                       ],
                     ),
                   ),
