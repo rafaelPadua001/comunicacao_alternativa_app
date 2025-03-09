@@ -1,4 +1,5 @@
-import 'settings.dart';
+import 'settingsGrid.dart';
+import '../student/studentsGrid.dart';
 import '../../main.dart';
 import 'package:flutter/material.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
@@ -22,6 +23,13 @@ class DashboarAdmindScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(builder: (context) => MyApp()),
                 );
+              }
+              if(index == 2){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => StudentsgsGrid()),
+                  );
               }
               if (index == 4) {
                 Navigator.push(
