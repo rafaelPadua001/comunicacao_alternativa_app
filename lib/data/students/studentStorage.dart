@@ -1,5 +1,4 @@
 import 'package:comunicacao_alternativa_app/services/supabase_config.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/student/student.dart';
 

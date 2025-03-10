@@ -32,12 +32,6 @@ class LoginStudentScreen extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // final student = Student(
-                //   name: _nameController.text,
-                //   age: int.parse(_ageController.text),
-                //   registration: _registrationController.text,
-                // );
-                //addStudent(student);
                 Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(
