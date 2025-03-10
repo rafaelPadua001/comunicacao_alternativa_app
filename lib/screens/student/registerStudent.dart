@@ -103,9 +103,17 @@ class _RegisterState extends State<RegisterStudent> {
                             if (result == null) {
                               // Sucesso no registro
                               print("Aluno registrado com sucesso!");
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Aluno Cadastrado com sucesso !')
+                              ),
+                              );
                             } else {
                               // Falha no registro
                               print(result);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Erro ao cadastrar novo aluno $result'),
+                                ),
+                              );
                             }
                                                     
                             
