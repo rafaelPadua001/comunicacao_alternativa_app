@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'registerStudent.dart';
 
 class StudentsgsGrid extends StatelessWidget {
   @override
@@ -14,20 +14,20 @@ class StudentsgsGrid extends StatelessWidget {
           mainAxisSpacing: 16,
           children: [
             _buildCard(
-              icon: Icons.settings,
-              title: "App Settings",
+              icon: Icons.people,
+              title: "All Students",
               onTap: () {
                 print("App Settings clicado");
               },
             ),
             _buildCard(
-              icon: Icons.image,
-              title: "Pictograms",
+              icon: Icons.person_3,
+              title: "Register",
               onTap: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => AddPictogram()),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RegisterStudent()),
+                );
 
               },
             ),
