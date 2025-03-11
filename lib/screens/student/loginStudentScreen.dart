@@ -1,9 +1,66 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '/models/student.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+//import '/models/student.dart';
+import '../../data/students/studentStorage.dart';
+import '../../services/supabase_config.dart';
 
 class LoginStudentScreen extends StatelessWidget {
-  final _registrationController = TextEditingController();
+  final StudentStorage _studentStorage = StudentStorage();  
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+
+  void _validate(BuildContext context) async{
+    final email = _emailController.text;
+    final password = _passwordController.text;
+
+    //simple validate
+    if(email.isEmpty || password.isEmpty){
+      _showErrorDialog(context, 'Email e senha são obrigatórios');
+      return;
+    }
+
+    if(
+      !RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+      ).hasMatch(email)){
+          _showErrorDialog(context, 'Digite um email válido');
+          return;
+      }
+   
+    await _login(context, email, password);
+  }
+
+  Future<void> _login(BuildContext context, String email, String password) async {
+      try{
+        final response = await _studentStorage.loginWithEmailPassword(email, password);
+        if(response != null){
+          Navigator.pushReplacementNamed(context, '/dashboardStudent');
+        }
+      }
+       on FirebaseAuthException catch(e){
+        _showErrorDialog(context, e.message ?? 'Erro ao fazer login');
+
+      }
+  }
+
+  void _showErrorDialog(BuildContext context, String message){
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+           TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Ok'),
+              ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +81,7 @@ class LoginStudentScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       TextField(
-                        controller: _registrationController,
+                        controller: _emailController,
                         decoration: InputDecoration(
                           labelText: 'Email / Registration',
                           hintText: 'aluno@email.com',
@@ -49,10 +106,8 @@ class LoginStudentScreen extends StatelessWidget {
                       Text('Recovery password'),
                       SizedBox(height: 20),
                       FilledButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        style: ElevatedButton.styleFrom(
+                        onPressed: () => _validate(context),
+                        style: OutlinedButton.styleFrom(
                           padding: EdgeInsets.symmetric(
                             horizontal: 20,
                             vertical: 12,
