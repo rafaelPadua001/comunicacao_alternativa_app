@@ -1,7 +1,9 @@
-import 'studentGrid.dart';
-import '../../main.dart';
+
 import 'package:flutter/material.dart';
 import '../../services/supabase_config.dart';
+import 'studentGrid.dart';
+import '../../main.dart';
+import '../../widgets/profile_user.dart';
 
 class DashboarStudentScreen extends StatefulWidget {
   @override
@@ -27,8 +29,6 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
                 .eq('id', user.id)
                 .maybeSingle();
 
-       
-
         if (response == null || response['email'] == null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -50,8 +50,7 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
               'displayname': null, // Defina como null inicialmente
               'photourl': null,
               'usertype': 'student',
-        });
-
+            });
       } catch (e) {
         print('Erro ao consultar o Supabase: $e');
       }
@@ -74,10 +73,11 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
                   MaterialPageRoute(builder: (context) => MyApp()),
                 );
               }
-              if (index == 2) {
+              if (index == 1) {
+                print('Account clicked');
                 Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => StudentgsGrid()),
+                 context,
+                 MaterialPageRoute(builder: (context) => ProfileUser()),
                 );
               }
               if (index == 4) {
@@ -94,7 +94,7 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
                 label: Text('Home'),
               ),
               NavigationRailDestination(
-                icon: Icon(Icons.manage_accounts),
+                icon: Icon(Icons.person_3),
                 label: Text('account'),
               ),
               NavigationRailDestination(
