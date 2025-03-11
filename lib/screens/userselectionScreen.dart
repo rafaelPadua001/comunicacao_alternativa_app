@@ -21,6 +21,7 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
 
 void _checkLoginStatus() async {
   final user = SupabaseConfig.supabase.auth.currentUser;
+  print('usuario logado: $user' );
   if (user != null) {
     // Usuário já logado
     Future.microtask(() {
