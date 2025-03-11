@@ -1,20 +1,71 @@
-// import 'settingsGrid.dart';
 import 'studentGrid.dart';
 import '../../main.dart';
 import 'package:flutter/material.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/supabase_config.dart';
 
-class DashboarStudentScreen extends StatelessWidget {
+class DashboarStudentScreen extends StatefulWidget {
+  @override
+  _DashboarStudentScreenState createState() => _DashboarStudentScreenState();
+}
+
+class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
+  @override
+  void initState() {
+    super.initState();
+    checkEmailVerification();
+  }
+
+  void checkEmailVerification() async {
+    print('Verificando e-mail...');
+    final user = SupabaseConfig.supabase.auth.currentUser;
+
+    if (user != null) {
+      try {
+        final response =
+            await SupabaseConfig.supabase
+                .from('user_profiles')
+                .select('email')
+                .eq('id', user.id)
+                .maybeSingle();
+
+       
+
+        if (response == null || response['email'] == null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Por favor, verifique seu e-mail para continuar.',
+                ),
+                duration: Duration(seconds: 10),
+              ),
+            );
+          });
+        }
+
+        final responseProfile = await SupabaseConfig.supabase
+            .from('user_profiles')
+            .upsert({
+              'id': user.id,
+              'email': user.email,
+              'displayname': null, // Defina como null inicialmente
+              'photourl': null,
+              'usertype': 'student',
+        });
+  
+      } catch (e) {
+        print('Erro ao consultar o Supabase: $e');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Obter o usuário logado
     final user = SupabaseConfig.supabase.auth.currentUser;
 
     return Scaffold(
       body: Row(
         children: [
-          // Navegação lateral com o NavigatorRail
           NavigationRail(
             selectedIndex: 0,
             onDestinationSelected: (int index) {
@@ -24,12 +75,11 @@ class DashboarStudentScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => MyApp()),
                 );
               }
-              if(index == 2){
+              if (index == 2) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => StudentgsGrid()),
-                  );
+                  MaterialPageRoute(builder: (context) => StudentgsGrid()),
+                );
               }
               if (index == 4) {
                 // Navigator.push(
@@ -44,14 +94,6 @@ class DashboarStudentScreen extends StatelessWidget {
                 icon: Icon(Icons.home),
                 label: Text('Home'),
               ),
-              // NavigationRailDestination(
-              //   icon: Icon(Icons.supervisor_account),
-              //   label: Text('guardians'),
-              // ),
-              // NavigationRailDestination(
-              //   icon: Icon(Icons.supervised_user_circle),
-              //   label: Text('students'),
-              // ),
               NavigationRailDestination(
                 icon: Icon(Icons.manage_accounts),
                 label: Text('account'),
@@ -62,26 +104,18 @@ class DashboarStudentScreen extends StatelessWidget {
               ),
             ],
           ),
-          // Conteúdo principal
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 children: [
                   user == null
-                      ? Text(
-                        'Nenhum usuário logado, drogado, $user',
-                      ) // Caso nenhum usuário esteja logado
+                      ? Text('Nenhum usuário logado')
                       : Column(
-                        mainAxisAlignment:
-                            MainAxisAlignment.start, // Alinha ao topo
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          SizedBox(
-                            height: 20,
-                          ), // Adiciona um espaço no topo da Column
-                          Text(
-                            'Bem-vindo, ${user.email}, seu maconheiro',
-                          ), // Exibe o e-mail do usuário
+                          SizedBox(height: 20),
+                          Text('Bem-vindo, ${user.email}'),
                           SizedBox(height: 20),
                         ],
                       ),
