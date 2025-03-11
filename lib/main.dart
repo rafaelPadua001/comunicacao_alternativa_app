@@ -3,7 +3,8 @@ import 'routes/admin.routes.dart' as adminRoutes;
 import 'package:comunicacao_alternativa_app/screens/userselectionScreen.dart';
 import 'screens/student/loginStudentScreen.dart' as studentScreen;
 import 'screens/admin/loginAdminScreen.dart' as adminScreen;
-import 'screens/admin/dashboard.dart' as dasboardScreen;
+import 'screens/admin/dashboard.dart' as dashboardScreen;
+import 'screens/student/dashboard.dart' as dashboardStudentScreen;
 import 'models/pictogram.dart' as modelPictogram;
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -69,7 +70,9 @@ class MyApp extends StatelessWidget {
           case '/loginAdmin':
             return MaterialPageRoute(builder: (context) => adminScreen.LoginAdminScreen());
           case '/dashboardAdmin':
-            return MaterialPageRoute(builder: (context) => dasboardScreen.DashboarAdmindScreen());  // Definindo a rota
+            return MaterialPageRoute(builder: (context) => dashboardScreen.DashboarAdmindScreen());  // Definindo a rota
+          case '/dashboardStudent':
+            return MaterialPageRoute(builder: (context) => dashboardStudentScreen.DashboarStudentScreen());
           // default:
           //   return MaterialPageRoute(builder: (context) => adminScreen.LoginAdminScreen());
         }

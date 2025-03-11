@@ -1,11 +1,11 @@
-import 'settingsGrid.dart';
-import 'students/studentsGrid.dart';
+// import 'settingsGrid.dart';
+import 'studentGrid.dart';
 import '../../main.dart';
 import 'package:flutter/material.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/supabase_config.dart';
 
-class DashboarAdmindScreen extends StatelessWidget {
+class DashboarStudentScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Obter o usuário logado
@@ -28,14 +28,14 @@ class DashboarAdmindScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => StudentsgsGrid()),
+                    builder: (context) => StudentgsGrid()),
                   );
               }
               if (index == 4) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SettingsGrid()),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => SettingsGrid()),
+                // );
               }
             },
             labelType: NavigationRailLabelType.all,
@@ -44,14 +44,14 @@ class DashboarAdmindScreen extends StatelessWidget {
                 icon: Icon(Icons.home),
                 label: Text('Home'),
               ),
-              NavigationRailDestination(
-                icon: Icon(Icons.supervisor_account),
-                label: Text('guardians'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.supervised_user_circle),
-                label: Text('students'),
-              ),
+              // NavigationRailDestination(
+              //   icon: Icon(Icons.supervisor_account),
+              //   label: Text('guardians'),
+              // ),
+              // NavigationRailDestination(
+              //   icon: Icon(Icons.supervised_user_circle),
+              //   label: Text('students'),
+              // ),
               NavigationRailDestination(
                 icon: Icon(Icons.manage_accounts),
                 label: Text('account'),
@@ -70,7 +70,7 @@ class DashboarAdmindScreen extends StatelessWidget {
                 children: [
                   user == null
                       ? Text(
-                        'Nenhum usuário logado',
+                        'Nenhum usuário logado, drogado, $user',
                       ) // Caso nenhum usuário esteja logado
                       : Column(
                         mainAxisAlignment:
@@ -80,7 +80,7 @@ class DashboarAdmindScreen extends StatelessWidget {
                             height: 20,
                           ), // Adiciona um espaço no topo da Column
                           Text(
-                            'Bem-vindo, ${user.email}',
+                            'Bem-vindo, ${user.email}, seu maconheiro',
                           ), // Exibe o e-mail do usuário
                           SizedBox(height: 20),
                         ],

@@ -1,9 +1,8 @@
 import 'package:comunicacao_alternativa_app/services/supabase_config.dart';
 import 'package:flutter/material.dart';
-import '/models/student.dart';
-import '../routes/student.routes.dart';
+// import '/models/student.dart';
+// import '../routes/student.routes.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
-
 
 class UserSelectionScreen extends StatefulWidget {
   @override
@@ -19,18 +18,51 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
     _checkLoginStatus();
   }
 
-void _checkLoginStatus() async {
-  final user = SupabaseConfig.supabase.auth.currentUser;
-  print('usuario logado: $user' );
-  if (user != null) {
-    // Usuário já logado
-    Future.microtask(() {
-      print(user);
-      Navigator.restorablePushReplacementNamed(context, '/dashboardAdmin');
-    });
-  }
-}
+  void _checkLoginStatus() async {
+    final user = SupabaseConfig.supabase.auth.currentUser;
+    print('usuario logado: $user');
+    if (user != null) {
+      try {
+        final response =
+            await SupabaseConfig.supabase
+                .from('user_profiles')
+                .select()
+                .eq('id', user.id)
+                .single();
 
+        if (response.isNotEmpty) {
+          final userProfile = response;
+          print('Perfil ao usuário? $userProfile');
+          switch ('userProfile: $userProfile') {
+            case 'student':
+              print(userProfile);
+              Future.microtask(() {
+                print(user);
+                Navigator.restorablePushReplacementNamed(
+                  context,
+                  '/dashboardStudent',
+                );
+              });
+              break;
+            case 'admin':
+              Future.microtask(() {
+                print(user);
+                Navigator.restorablePushReplacementNamed(
+                  context,
+                  '/dashboardAdmin',
+                );
+              });
+              break;
+          }
+        }
+      } catch (e) {}
+      // Usuário já logado
+      Future.microtask(() {
+        print(user);
+        Navigator.restorablePushReplacementNamed(context, '/dashboardAdmin');
+      });
+    }
+  }
 
   void _navigateToLogin() {
     if (_selectedUserType != null) {
@@ -47,7 +79,7 @@ void _checkLoginStatus() async {
       }
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

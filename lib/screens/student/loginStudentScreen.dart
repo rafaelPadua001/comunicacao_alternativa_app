@@ -32,16 +32,37 @@ class LoginStudentScreen extends StatelessWidget {
   }
 
   Future<void> _login(BuildContext context, String email, String password) async {
-      try{
-        final response = await _studentStorage.loginWithEmailPassword(email, password);
-        if(response != null){
-          Navigator.pushReplacementNamed(context, '/dashboardStudent');
-        }
-      }
-       on FirebaseAuthException catch(e){
-        _showErrorDialog(context, e.message ?? 'Erro ao fazer login');
+     try {
+    // Faz o login do usuário
+    final response = await SupabaseConfig.supabase.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
 
+    // Verifica se o e-mail foi confirmado
+    final user = response.user;
+    if (user != null) {
+      print('Login bem-sucedido.');
+      Future.microtask(() {
+        Navigator.restorablePushReplacementNamed(context, '/dashboardStudent');
+      });
+    }
+  } catch (e) {
+    if (e is AuthException) {
+      // Verifica se a mensagem de erro contém 'email not confirmed'
+      if (e.message.contains('Email not confirmed')) {
+        print('E-mail não confirmado, mas permitindo login.');
+        // Permite o login mesmo sem confirmação de e-mail
+        Future.microtask(() {
+          Navigator.restorablePushReplacementNamed(context, '/dashboardStudent');
+        });
+      } else {
+        print('Erro ao fazer login: ${e.message}');
       }
+    } else {
+      print('Erro ao fazer login: $e');
+    }
+  }
   }
 
   void _showErrorDialog(BuildContext context, String message){
