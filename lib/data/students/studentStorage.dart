@@ -23,7 +23,7 @@ class StudentStorage {
           return saveResult;
         }
 
-        return null;
+        return saveResult;
       }
     } on AuthException catch (e) {
       print('Erro de autenticação: ${e.message}');
@@ -47,7 +47,7 @@ class StudentStorage {
           });
 
       // Sucesso
-      return null;
+      return response;
     } on PostgrestException catch (e) {
       // Captura erros específicos do Supabase
       print('Erro ao salvar usuário na tabela: $e');

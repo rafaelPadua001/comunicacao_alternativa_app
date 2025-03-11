@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'registerStudent.dart';
+import '../../student/registerStudent.dart';
 
 class StudentsgsGrid extends StatelessWidget {
   @override
