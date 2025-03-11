@@ -14,7 +14,9 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
   @override
   void initState() {
     super.initState();
-    checkEmailVerification();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+      checkEmailVerification();
+    });
   }
 
   void checkEmailVerification() async {
@@ -22,14 +24,8 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
 
     if (user != null) {
       try {
-        final response =
-            await SupabaseConfig.supabase
-                .from('user_profiles')
-                .select('email')
-                .eq('id', user.id)
-                .maybeSingle();
-
-        if (response == null || response['email'] == null) {
+        
+        if (user.emailConfirmedAt == null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -42,15 +38,7 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
           });
         }
 
-        final responseProfile = await SupabaseConfig.supabase
-            .from('user_profiles')
-            .upsert({
-              'id': user.id,
-              'email': user.email,
-              'displayname': null, // Defina como null inicialmente
-              'photourl': null,
-              'usertype': 'student',
-            });
+      
       } catch (e) {
         print('Erro ao consultar o Supabase: $e');
       }
