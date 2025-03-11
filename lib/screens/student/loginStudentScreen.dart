@@ -42,7 +42,6 @@ class LoginStudentScreen extends StatelessWidget {
     // Verifica se o e-mail foi confirmado
     final user = response.user;
     if (user != null) {
-      print('Login bem-sucedido.');
       Future.microtask(() {
         Navigator.restorablePushReplacementNamed(context, '/dashboardStudent');
       });
@@ -51,7 +50,6 @@ class LoginStudentScreen extends StatelessWidget {
     if (e is AuthException) {
       // Verifica se a mensagem de erro contém 'email not confirmed'
       if (e.message.contains('Email not confirmed')) {
-        print('E-mail não confirmado, mas permitindo login.');
         // Permite o login mesmo sem confirmação de e-mail
         Future.microtask(() {
           Navigator.restorablePushReplacementNamed(context, '/dashboardStudent');

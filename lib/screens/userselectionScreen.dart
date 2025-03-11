@@ -20,47 +20,49 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
 
   void _checkLoginStatus() async {
     final user = SupabaseConfig.supabase.auth.currentUser;
-    print('usuario logado: $user');
+    
     if (user != null) {
       try {
         final response =
             await SupabaseConfig.supabase
                 .from('user_profiles')
-                .select()
+                .select('usertype')
                 .eq('id', user.id)
                 .single();
-
+         
         if (response.isNotEmpty) {
-          final userProfile = response;
-          print('Perfil ao usuário? $userProfile');
-          switch ('userProfile: $userProfile') {
-            case 'student':
-              print(userProfile);
-              Future.microtask(() {
-                print(user);
-                Navigator.restorablePushReplacementNamed(
-                  context,
-                  '/dashboardStudent',
-                );
-              });
-              break;
-            case 'admin':
-              Future.microtask(() {
-                print(user);
-                Navigator.restorablePushReplacementNamed(
-                  context,
-                  '/dashboardAdmin',
-                );
-              });
-              break;
-          }
+          final userProfile = response['usertype'];
+           print(userProfile);
+         switch (userProfile) { // Use userProfile diretamente, sem concatenar
+    case 'student':
+      print('Redirecionando para o dashboard do estudante');
+      Future.microtask(() {
+        Navigator.restorablePushReplacementNamed(
+          context,
+          '/dashboardStudent',
+        );
+      });
+      break;
+    case 'admin':
+      print('Redirecionando para o dashboard do administrador');
+      Future.microtask(() {
+        Navigator.restorablePushReplacementNamed(
+          context,
+          '/dashboardAdmin',
+        );
+      });
+      break;
+    default:
+      print('Tipo de usuário desconhecido: $userProfile');
+      break;
+  }
         }
       } catch (e) {}
       // Usuário já logado
-      Future.microtask(() {
-        print(user);
-        Navigator.restorablePushReplacementNamed(context, '/dashboardAdmin');
-      });
+      // Future.microtask(() {
+      //   print(user);
+      //   Navigator.restorablePushReplacementNamed(context, '/dashboardAdmin');
+      // });
     }
   }
 
