@@ -84,48 +84,44 @@ class _ProfileUserState extends State<ProfileUser> {
   }
 
   Future<void> _uploadImage(XFile image) async {
-    try {
-      // Define o caminho do arquivo no storage
-      final filePath =
-          '${user!.id}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+  try {
+    // Define o caminho do arquivo no storage
+    final filePath = '${user!.id}/${DateTime.now().millisecondsSinceEpoch}.jpg';
 
-      // Converte o XFile em File
-      final fileBytes = await image.readAsBytes();
+    // Converte o XFile em File
+    final fileBytes = await image.readAsBytes();
+    final tempDir = await Directory.systemTemp.create(); // Cria o diretório temporário
+    final tempFile = File('${tempDir.path}/temp_image.jpg'); // Cria um arquivo temporário
+    await tempFile.writeAsBytes(fileBytes); // Salva os bytes no arquivo temporário
 
-      // Obtém o diretório temporário correto
-      final tempDir = await getTemporaryDirectory();
-      final tempFile = File('${tempDir.path}/temp_image.jpg');
+    // Faz o upload da imagem para o Supabase Storage
+    final uploadResponse = await SupabaseConfig.supabase.storage
+        .from('profile_images')
+        .upload(filePath, tempFile);
 
-      await tempFile.writeAsBytes(
-        fileBytes,
-      ); // Salva os bytes no arquivo temporário
+    // Gera uma URL assinada válida por 1 hora (3600 segundos)
+    final signedUrlResponse = await SupabaseConfig.supabase.storage
+        .from('profile_images')
+        .createSignedUrl(filePath, 3600);
 
-      // Faz o upload da imagem para o Supabase Storage
-      final uploadResponse = await SupabaseConfig.supabase.storage
-          .from('profile_images')
-          .upload(filePath, tempFile);
+    // Atualiza o perfil do usuário com a nova URL assinada da imagem
+    final updateResponse = await SupabaseConfig.supabase
+        .from('user_profiles')
+        .update({'photourl': signedUrlResponse})
+        .eq('id', user!.id);
 
-      // Obtém a URL pública da imagem
-      final imageUrlResponse = SupabaseConfig.supabase.storage
-          .from('profile_images')
-          .getPublicUrl(filePath);
-
-      // Atualiza o perfil do usuário com a nova URL da imagem
-      final updateResponse = await SupabaseConfig.supabase
-          .from('user_profiles')
-          .update({'photourl': imageUrlResponse})
-          .eq('id', user!.id);
-
+    
       setState(() {
-        imageUrl = imageUrlResponse;
+        imageUrl = signedUrlResponse;
       });
-
-      // Exclui o arquivo temporário após o upload
-      await tempFile.delete();
-    } catch (e) {
-      print('Erro durante o upload: $e');
-    }
+    
+   
+    // Exclui o arquivo temporário após o upload
+    await tempFile.delete();
+  } catch (e) {
+    print('Erro durante o upload: $e');
   }
+}
 
   Future<void> _pickImageFromGalery() async {
     final ImagePicker _picker = ImagePicker();
