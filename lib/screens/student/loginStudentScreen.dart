@@ -119,7 +119,7 @@ class LoginStudentScreen extends StatelessWidget {
                           suffixIcon: Icon(Icons.lock),
                           border: OutlineInputBorder(),
                         ),
-                        keyboardType: TextInputType.number,
+                        // keyboardType: TextInputType.number,
                       ),
                       SizedBox(height: 20),
                       Text('Recovery password'),
