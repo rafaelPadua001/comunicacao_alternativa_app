@@ -16,7 +16,6 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
   }
 
   void checkEmailVerification() async {
-    print('Verificando e-mail...');
     final user = SupabaseConfig.supabase.auth.currentUser;
 
     if (user != null) {
@@ -52,7 +51,7 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
               'photourl': null,
               'usertype': 'student',
         });
-  
+
       } catch (e) {
         print('Erro ao consultar o Supabase: $e');
       }
