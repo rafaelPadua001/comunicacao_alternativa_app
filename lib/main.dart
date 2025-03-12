@@ -6,6 +6,7 @@ import 'screens/admin/loginAdminScreen.dart' as adminScreen;
 import 'screens/master/loginMasterScreen.dart' as masterScreen;
 import 'screens/admin/dashboard.dart' as dashboardScreen;
 import 'screens/student/dashboard.dart' as dashboardStudentScreen;
+import 'screens/master/dashboard.dart' as dashboardMasterScreen;
 import 'models/pictogram.dart' as modelPictogram;
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -76,6 +77,8 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(builder: (context) => dashboardScreen.DashboarAdmindScreen());  // Definindo a rota
           case '/dashboardStudent':
             return MaterialPageRoute(builder: (context) => dashboardStudentScreen.DashboarStudentScreen());
+          case '/dashboardMaster':
+            return MaterialPageRoute(builder: (context) => dashboardMasterScreen.DashboarMasterScreen());
           // default:
           //   return MaterialPageRoute(builder: (context) => adminScreen.LoginAdminScreen());
         }

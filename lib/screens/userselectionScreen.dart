@@ -32,12 +32,18 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
            print(userProfile);
          switch (userProfile) { // Use userProfile diretamente, sem concatenar
     case 'student':
-      print('Redirecionando para o dashboard do estudante');
       Future.microtask(() {
         Navigator.restorablePushReplacementNamed(
           context,
           '/dashboardStudent',
         );
+      });
+      break;
+    case 'master':
+      Future.microtask((){
+        Navigator.restorablePushReplacementNamed(
+          context,
+          '/dashboardMaster');
       });
       break;
     case 'admin':
@@ -70,7 +76,6 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
           Navigator.pushNamed(context, '/loginStudent');
           break;
         case 'Master':
-          print('teste');
           Navigator.pushNamed(context, '/loginMaster');
           break;
         case 'Administrador':
