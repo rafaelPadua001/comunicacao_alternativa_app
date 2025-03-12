@@ -216,8 +216,7 @@ class _ProfileUserState extends State<ProfileUser> {
                               ),
                             ] else
                               Text('Aqui vai ser o input do nome'),
-                            Text('Email: ${profileUser['email']}'),
-                            Text('Tipo de usuário: ${profileUser['usertype']}'),
+                            
                           ],
                         ),
                         SizedBox(height: 10),
