@@ -67,6 +67,10 @@ class _SetLanguageState extends State<SetLanguage> {
     );
   }
 
+  void _submitSelectionSpeed(){
+    print('speed selected');
+  }
+
   Future<void> _speakPreview() async {
     await _textToSpeech.setSpeechRate(
       _currentSliderValue / 100,
@@ -138,7 +142,7 @@ class _SetLanguageState extends State<SetLanguage> {
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ElevatedButton(
-                  onPressed: _submitSelection,
+                  onPressed: _submitSelectionSpeed,
                   child: Text('Submit'),
                 ),
               ),
