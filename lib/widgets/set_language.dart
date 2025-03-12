@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import '../services/text_to_speech.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,8 +12,9 @@ class SetLanguage extends StatefulWidget {
 
 class _SetLanguageState extends State<SetLanguage> {
   SingningLangague? _selectedLanguage = SingningLangague.english;
+  double _currentSliderValue = 100;
 
-  final TextToSpeech _textToSpeech = TextToSpeech();
+  final FlutterTts _textToSpeech = FlutterTts();
 
   @override
   void initState() {
@@ -65,6 +67,15 @@ class _SetLanguageState extends State<SetLanguage> {
     );
   }
 
+  Future<void> _speakPreview() async {
+    await _textToSpeech.setSpeechRate(
+      _currentSliderValue / 100,
+    ); // Use setSpeechRate
+    await _textToSpeech.speak(
+      "Preview of speech speed",
+    ); // Adicione um texto para o preview
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,7 +84,7 @@ class _SetLanguageState extends State<SetLanguage> {
         children: [
           //First Card
           ExpansionTile(
-            title: Text('Set Language o speech'),
+            title: Text('Set Language to speech'),
             children: [
               ListTile(
                 title: const Text('English'),
@@ -98,6 +109,31 @@ class _SetLanguageState extends State<SetLanguage> {
                     });
                   },
                 ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ElevatedButton(
+                  onPressed: _submitSelection,
+                  child: Text('Submit'),
+                ),
+              ),
+            ],
+          ),
+          ExpansionTile(
+            title: Text('Set Language speed'),
+            children: [
+              Text('voice speed ${_currentSliderValue.toString()}'),
+              Slider(
+                value: _currentSliderValue,
+                max: 100,
+                onChanged: (double value) {
+                  setState(() {
+                    _currentSliderValue = value;
+                  });
+                },
+                onChangeEnd: (double value) {
+                  _speakPreview(); // Chama o preview apenas quando o usuário solta o slider
+                },
               ),
               Padding(
                 padding: const EdgeInsets.all(16.0),
