@@ -1,9 +1,11 @@
 import 'settingsGrid.dart';
 import 'students/studentsGrid.dart';
+import 'masters/mastersGrid.dart';
 import '../../main.dart';
 import 'package:flutter/material.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/supabase_config.dart';
+
 
 class DashboarAdmindScreen extends StatelessWidget {
   @override
@@ -23,6 +25,15 @@ class DashboarAdmindScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(builder: (context) => MyApp()),
                 );
+              }
+              if(index == 1){
+                print('masters clicked');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MastersgsGrid()
+                    ),
+                  );
               }
               if(index == 2){
                 Navigator.push(
@@ -46,7 +57,7 @@ class DashboarAdmindScreen extends StatelessWidget {
               ),
               NavigationRailDestination(
                 icon: Icon(Icons.supervisor_account),
-                label: Text('guardians'),
+                label: Text('Masters'),
               ),
               NavigationRailDestination(
                 icon: Icon(Icons.supervised_user_circle),
