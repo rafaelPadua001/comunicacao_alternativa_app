@@ -1,8 +1,5 @@
 import 'package:comunicacao_alternativa_app/services/supabase_config.dart';
 import 'package:flutter/material.dart';
-// import '/models/student.dart';
-// import '../routes/student.routes.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
 
 class UserSelectionScreen extends StatefulWidget {
   @override
@@ -72,8 +69,9 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
         case 'Student':
           Navigator.pushNamed(context, '/loginStudent');
           break;
-        case 'Professor':
-          Navigator.pushNamed(context, '/loginProfessor');
+        case 'Master':
+          print('teste');
+          Navigator.pushNamed(context, '/loginMaster');
           break;
         case 'Administrador':
           Navigator.pushNamed(context, '/loginAdmin');
@@ -102,7 +100,7 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
             ),
             RadioListTile<String>(
               title: Text("Professor"),
-              value: "Professor",
+              value: "Master",
               groupValue: _selectedUserType,
               onChanged: (value) {
                 setState(() {
