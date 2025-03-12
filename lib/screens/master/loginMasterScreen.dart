@@ -101,8 +101,8 @@ class LoginMasterScreen extends StatelessWidget {
                         controller: _emailController,
                         decoration: InputDecoration(
                           labelText: 'Email / Registration',
-                          hintText: 'aluno@email.com',
-                          helperText: 'aluno@email.com',
+                          hintText: 'master@email.com',
+                          helperText: 'master@email.com',
                           suffixIcon: Icon(Icons.person_2_outlined),
                           border: OutlineInputBorder(),
                         ),

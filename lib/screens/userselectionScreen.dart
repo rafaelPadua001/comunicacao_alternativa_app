@@ -17,7 +17,7 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
 
   void _checkLoginStatus() async {
     final user = SupabaseConfig.supabase.auth.currentUser;
-    
+
     if (user != null) {
       try {
         final response =
@@ -26,33 +26,41 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
                 .select('usertype')
                 .eq('id', user.id)
                 .single();
-         
+
         if (response.isNotEmpty) {
           final userProfile = response['usertype'];
-           print(userProfile);
-         switch (userProfile) { // Use userProfile diretamente, sem concatenar
-    case 'student':
-      print('Redirecionando para o dashboard do estudante');
-      Future.microtask(() {
-        Navigator.restorablePushReplacementNamed(
-          context,
-          '/dashboardStudent',
-        );
-      });
-      break;
-    case 'admin':
-      print('Redirecionando para o dashboard do administrador');
-      Future.microtask(() {
-        Navigator.restorablePushReplacementNamed(
-          context,
-          '/dashboardAdmin',
-        );
-      });
-      break;
-    default:
-      print('Tipo de usuário desconhecido: $userProfile');
-      break;
-  }
+
+          switch (userProfile) {
+            // Use userProfile diretamente, sem concatenar
+            case 'student':
+              Future.microtask(() {
+                Navigator.restorablePushReplacementNamed(
+                  context,
+                  '/dashboardStudent',
+                );
+              });
+              break;
+            case 'master':
+              Future.microtask(() {
+                Navigator.restorablePushReplacementNamed(
+                  context,
+                  '/dashboardMaster',
+                );
+              });
+              break;
+            case 'admin':
+              print('Redirecionando para o dashboard do administrador');
+              Future.microtask(() {
+                Navigator.restorablePushReplacementNamed(
+                  context,
+                  '/dashboardAdmin',
+                );
+              });
+              break;
+            default:
+              print('Tipo de usuário desconhecido: $userProfile');
+              break;
+          }
         }
       } catch (e) {}
       // Usuário já logado
@@ -70,7 +78,6 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
           Navigator.pushNamed(context, '/loginStudent');
           break;
         case 'Master':
-          print('teste');
           Navigator.pushNamed(context, '/loginMaster');
           break;
         case 'Administrador':
