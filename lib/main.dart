@@ -3,6 +3,7 @@ import 'routes/admin.routes.dart' as adminRoutes;
 import 'package:comunicacao_alternativa_app/screens/userselectionScreen.dart';
 import 'screens/student/loginStudentScreen.dart' as studentScreen;
 import 'screens/admin/loginAdminScreen.dart' as adminScreen;
+import 'screens/master/loginMasterScreen.dart' as masterScreen;
 import 'screens/admin/dashboard.dart' as dashboardScreen;
 import 'screens/student/dashboard.dart' as dashboardStudentScreen;
 import 'models/pictogram.dart' as modelPictogram;
@@ -69,6 +70,8 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(builder: (context) => studentScreen.LoginStudentScreen());
           case '/loginAdmin':
             return MaterialPageRoute(builder: (context) => adminScreen.LoginAdminScreen());
+          case '/loginMaster':
+            return MaterialPageRoute(builder: (context) => masterScreen.LoginMasterScreen());
           case '/dashboardAdmin':
             return MaterialPageRoute(builder: (context) => dashboardScreen.DashboarAdmindScreen());  // Definindo a rota
           case '/dashboardStudent':
