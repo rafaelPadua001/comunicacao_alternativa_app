@@ -163,7 +163,7 @@ class _PictogramCardState extends State<PictogramCard> {
               Navigator.pushReplacementNamed(context, '/loginProfessor');
               break;
             default:
-              Navigator.pushReplacementNamed(context, '/userSelection');
+              Navigator.pushReplacementNamed(context, '/userselectionScreen');
               break;
           }
         } else {
