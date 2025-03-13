@@ -3,6 +3,7 @@ class Pictogram {
   final String label;
   final String category;
   final String imageUrl;
+  final String userId;
   final DateTime createdAt;
 
   Pictogram({
@@ -10,6 +11,7 @@ class Pictogram {
     required this.label,
     required this.category,
     required this.imageUrl,
+    required this.userId,
     required this.createdAt,
   });
  
@@ -20,6 +22,7 @@ class Pictogram {
       'label': label,
       'category': category,
       'imageUrl': imageUrl,
+      'user_id': userId,
       'created_at': createdAt.toIso8601String(), // ISO 8601 (compatível com Supabase)
     };
   }
@@ -33,6 +36,7 @@ class Pictogram {
       label: json['label'] ?? 'sem nome',
       category: json['category'] ?? 'sem categoria',
       imageUrl: json['imageUrl'] ?? '',
+      userId: json['userId'] ?? '', 
       createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at']) ?? DateTime.now()
       : DateTime.now(),
        // Supabase retorna string ISO
