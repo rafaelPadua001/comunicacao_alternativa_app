@@ -4,6 +4,7 @@ import 'package:comunicacao_alternativa_app/screens/userselectionScreen.dart';
 import 'screens/student/loginStudentScreen.dart' as studentScreen;
 import 'screens/admin/loginAdminScreen.dart' as adminScreen;
 import 'screens/master/loginMasterScreen.dart' as masterScreen;
+import 'screens/userselectionScreen.dart' as userselectionScreen;
 import 'screens/admin/dashboard.dart' as dashboardScreen;
 import 'screens/student/dashboard.dart' as dashboardStudentScreen;
 import 'screens/master/dashboard.dart' as dashboardMasterScreen;
@@ -79,8 +80,8 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(builder: (context) => dashboardStudentScreen.DashboarStudentScreen());
           case '/dashboardMaster':
             return MaterialPageRoute(builder: (context) => dashboardMasterScreen.DashboarMasterScreen());
-          // default:
-          //   return MaterialPageRoute(builder: (context) => adminScreen.LoginAdminScreen());
+          default:
+            return MaterialPageRoute(builder: (context) => userselectionScreen.UserSelectionScreen());
         }
       },
       // routes: {
