@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import '../../../services/supabase_config.dart';
 import '../../../data/pictograms/pictogramStorage.dart' as adminPictogram;
 import '../../../data/pictogramStorage.dart' as localPictogram;
 import '../../../models/pictogram.dart';
 import '../../../services/delete_pictograms.dart';
-import '../../../services/supabase_config.dart';
 
 class AddPictogram extends StatefulWidget {
   @override
@@ -49,7 +49,6 @@ class _AddPictogramState extends State<AddPictogram> {
   }
 
   void _savePictogram() async {
-    final userId = SupabaseConfig.supabase.auth.currentUser?.id ?? '';
     if (_image == null ||
         _labelController.text.isEmpty ||
         _selectedCategory == null) {
@@ -62,7 +61,8 @@ class _AddPictogramState extends State<AddPictogram> {
     }
 
     setState(() => _isUploading = true);
-
+      final userId = SupabaseConfig.supabase.auth.currentUser?.id ?? '';
+    
     try {
       // Upload da imagem para o Supabase Storage
       final String? imageUrl = await adminPictogram
@@ -74,7 +74,7 @@ class _AddPictogramState extends State<AddPictogram> {
         _labelController.text,
         _selectedCategory!,
         imageUrl,
-        userId
+        userId,
       );
 
       if (isSaved) {

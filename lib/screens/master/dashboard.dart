@@ -5,6 +5,7 @@ import '../../main.dart';
 import '../../widgets/profile_user.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'settingsGrid.dart';
 
 class DashboarMasterScreen extends StatefulWidget {
   @override
@@ -100,11 +101,11 @@ class _DashboarMasterScreenState extends State<DashboarMasterScreen> {
                   MaterialPageRoute(builder: (context) => ProfileUser()),
                 );
               }
-              if (index == 4) {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => SettingsGrid()),
-                // );
+              if (index == 3) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SettingsGrid()),
+                );
               }
             },
             labelType: NavigationRailLabelType.all,

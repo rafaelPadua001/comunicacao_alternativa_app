@@ -39,12 +39,14 @@ class PictogramStorage {
     String label,
     String category,
     String imageUrl,
+    String userId 
   ) async {
     try {
       await SupabaseConfig.supabase.from('pictograms_table').insert({
         'label': label,
         'category': category,
         'imageUrl': imageUrl,
+        'user_id': userId,
       });
 
       return true;
