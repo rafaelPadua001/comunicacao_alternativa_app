@@ -36,6 +36,7 @@ class _AddPictogramState extends State<AddPictogram> {
 
   List<Map<String, dynamic>> _allPictograms = [];
   final localPictogramStorage = localPictogram.Pictogramstorage();
+  final userId = SupabaseConfig.supabase.auth.currentUser?.id;
 
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(
@@ -191,7 +192,7 @@ class _AddPictogramState extends State<AddPictogram> {
 
       // Carregar pictogramas do Supabase
       var supabasePictograms =
-          await adminPictogram.PictogramStorage.getPictograms();
+          await adminPictogram.PictogramStorage.getPictogramsByProfileId();
       print(
         "Pictogramas do Supabase: $supabasePictograms",
       ); // Verifique o tipo real da resposta

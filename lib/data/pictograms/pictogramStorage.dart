@@ -9,7 +9,8 @@ import '../../../services/supabase_config.dart';
 
 class PictogramStorage {
   static const String bucketName = 'pictograms';
-
+ 
+  
   //upload image method
   static Future<String?> uploadImage(File image) async {
     try {
@@ -46,7 +47,7 @@ class PictogramStorage {
         'label': label,
         'category': category,
         'imageUrl': imageUrl,
-        'user_id': userId,
+        'profile_id': userId,
       });
 
       return true;
@@ -56,10 +57,14 @@ class PictogramStorage {
     }
   }
 
-  static Future<List<Pictogram>> getPictograms() async {
+  static Future<List<Pictogram>> getPictogramsByProfileId() async {
     try {
+      final userId = SupabaseConfig.supabase.auth.currentUser?.id ?? '';
       final response =
-          await SupabaseConfig.supabase.from('pictograms_table').select();
+          await SupabaseConfig.supabase
+              .from('pictograms_table')
+              .select()
+              .eq('profile_id', userId);
       print(response);
       // Verifique se a resposta contém a chave 'data'
       if (response != null && response is List) {
@@ -77,6 +82,31 @@ class PictogramStorage {
       return [];
     }
   }
+
+  static Future<List<Pictogram>> getPictograms() async {
+    try {
+      
+      final response =
+          await SupabaseConfig.supabase
+              .from('pictograms_table').select();
+      print(response);
+      // Verifique se a resposta contém a chave 'data'
+      if (response != null && response is List) {
+        List<Pictogram> pictograms =
+            response
+                .map<Pictogram>((data) => Pictogram.fromJson(data))
+                .toList();
+        return pictograms;
+      } else {
+        print("Formato de resposta inválido ou vazio");
+        return [];
+      }
+    } catch (error) {
+      print("Erro ao buscar pictogramas: $error");
+      return [];
+    }
+  }
+
 
   static Future<void> deletePictograms(
     BuildContext context,
