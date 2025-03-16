@@ -37,6 +37,67 @@ class _AddPictogramState extends State<AddPictogram> {
   List<Map<String, dynamic>> _allPictograms = [];
   final localPictogramStorage = localPictogram.Pictogramstorage();
 
+  bool _canAddPictograms = true; // Estado para controlar permissão
+
+  @override
+  void initState() {
+    super.initState();
+    _checkUserType(); // Verifica o userType ao inicializar
+    print(_checkUserType());
+    _loadPictograms();
+    _deletePictograms = DeletePictograms(
+      cloudImages: cloudImages,
+      localImages: localImages,
+    );
+  }
+
+  Future<void> _checkUserType() async {
+    final userType = await getUserType();
+    
+    if (userType == 'admin' || userType == 'master') {
+      
+      setState(() {
+        _canAddPictograms = true; // Permite adicionar pictogramas
+      });
+    } else {
+      setState(() {
+        
+        _canAddPictograms = false; // Não permite adicionar pictogramas
+      });
+    }
+  }
+
+ Future<String?> getUserType() async {
+  try {
+    final userId = SupabaseConfig.supabase.auth.currentUser?.id;
+    if (userId == null) {
+      print('Usuário não autenticado.');
+      return null;
+    }
+    print('UserId: $userId'); // Log para verificar o userId
+
+    // Executa a consulta na tabela `user_profiles`
+    final response = await SupabaseConfig.supabase
+        .from('user_profiles')
+        .select('usertype')
+        .eq('id', userId); // Filtra pelo ID do usuário
+
+    print('Resposta da consulta: $response'); // Log para verificar a resposta
+
+    // Verifica se houve erro na resposta
+    if (response.isEmpty) {
+      print('Nenhum perfil encontrado para o usuário com ID: $userId');
+      return null;
+    }
+
+    // Retorna o valor da coluna userType
+    return response[0]['usertype'];
+  } catch (e) {
+    print('Erro ao buscar usertype: $e');
+    return null;
+  }
+}
+
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(
       source: ImageSource.gallery,
@@ -74,7 +135,7 @@ class _AddPictogramState extends State<AddPictogram> {
         _labelController.text,
         _selectedCategory!,
         imageUrl,
-        userId
+        userId,
       );
 
       if (isSaved) {
@@ -181,13 +242,13 @@ class _AddPictogramState extends State<AddPictogram> {
       // Converter os pictogramas locais de List<Pictogram> para List<Map<String, dynamic>>
       List<Map<String, dynamic>> localPictogramsMap =
           localPictograms.map((pictogram) {
-            return {
-              "isLocal": true,
-              "imagePath":
-                  pictogram.imagePath, // Verifique se esse caminho está correto
-              "label": pictogram.label,
-            };
-          }).toList();
+        return {
+          "isLocal": true,
+          "imagePath":
+              pictogram.imagePath, // Verifique se esse caminho está correto
+          "label": pictogram.label,
+        };
+      }).toList();
 
       // Carregar pictogramas do Supabase
       var supabasePictograms =
@@ -199,14 +260,13 @@ class _AddPictogramState extends State<AddPictogram> {
       // Certifique-se de que a resposta está no formato esperado
       List<Map<String, dynamic>> supabasePictogramsMap =
           supabasePictograms.map((pictogram) {
-            return {
-              "isLocal": false,
-              "imageUrl":
-                  pictogram
-                      .imageUrl, // Garanta que você está acessando a chave correta
-              "label": pictogram.label,
-            };
-          }).toList();
+        return {
+          "isLocal": false,
+          "imageUrl":
+              pictogram.imageUrl, // Garanta que você está acessando a chave correta
+          "label": pictogram.label,
+        };
+      }).toList();
 
       setState(() {
         _allPictograms = [];
@@ -221,16 +281,6 @@ class _AddPictogramState extends State<AddPictogram> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _loadPictograms();
-    _deletePictograms = DeletePictograms(
-      cloudImages: cloudImages,
-      localImages: localImages,
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Pictograms")),
@@ -239,79 +289,79 @@ class _AddPictogramState extends State<AddPictogram> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 4,
-                child: ExpansionTile(
-                  title: Text(
-                    "Add Pictogram",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              if (_canAddPictograms) // Exibe o formulário apenas se o usuário tiver permissão
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          _image != null
-                              ? Image.file(_image!, height: 200)
-                              : Text(
-                                'Select Image',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                          SizedBox(height: 10),
-                          ElevatedButton(
-                            onPressed: _pickImage,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.file_upload, size: 24),
-                                SizedBox(width: 8),
-                                Text("Upload Image"),
-                              ],
-                            ),
-                          ),
-                          if (_image != null) ...[
-                            SizedBox(height: 10),
-                            TextField(
-                              controller: _labelController,
-                              decoration: InputDecoration(
-                                labelText: "Pictogram Name",
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            DropdownButton<String>(
-                              value: _selectedCategory,
-                              hint: Text("Select a category"),
-                              isExpanded: true,
-                              items:
-                                  categories.map((String category) {
-                                    return DropdownMenuItem<String>(
-                                      value: category,
-                                      child: Text(category),
-                                    );
-                                  }).toList(),
-                              onChanged: (String? newCategory) {
-                                setState(() {
-                                  _selectedCategory = newCategory;
-                                });
-                              },
-                            ),
+                  elevation: 4,
+                  child: ExpansionTile(
+                    title: Text(
+                      "Add Pictogram",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            _image != null
+                                ? Image.file(_image!, height: 200)
+                                : Text(
+                                    'Select Image',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
                             SizedBox(height: 10),
                             ElevatedButton(
-                              onPressed: _savePictogram,
-                              child: Text('Save'),
+                              onPressed: _pickImage,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.file_upload, size: 24),
+                                  SizedBox(width: 8),
+                                  Text("Upload Image"),
+                                ],
+                              ),
                             ),
+                            if (_image != null) ...[
+                              SizedBox(height: 10),
+                              TextField(
+                                controller: _labelController,
+                                decoration: InputDecoration(
+                                  labelText: "Pictogram Name",
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              DropdownButton<String>(
+                                value: _selectedCategory,
+                                hint: Text("Select a category"),
+                                isExpanded: true,
+                                items: categories.map((String category) {
+                                  return DropdownMenuItem<String>(
+                                    value: category,
+                                    child: Text(category),
+                                  );
+                                }).toList(),
+                                onChanged: (String? newCategory) {
+                                  setState(() {
+                                    _selectedCategory = newCategory;
+                                  });
+                                },
+                              ),
+                              SizedBox(height: 10),
+                              ElevatedButton(
+                                onPressed: _savePictogram,
+                                child: Text('Save'),
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
               Card(
                 shape: RoundedRectangleBorder(
                   // borderRadius: BorderRadius.circular(10),
@@ -340,62 +390,50 @@ class _AddPictogramState extends State<AddPictogram> {
                   children: [
                     Padding(
                       padding: EdgeInsets.all(16),
-                      child:
-                          _isLoading
-                              ? CircularProgressIndicator()
-                              : _allPictograms.isEmpty
+                      child: _isLoading
+                          ? CircularProgressIndicator()
+                          : _allPictograms.isEmpty
                               ? Text("Nenhum pictograma encontrado.")
                               : Wrap(
-                                spacing: 8.0,
-                                runSpacing: 8.0,
-                                children:
-                                    _allPictograms.asMap().entries.map((entry) {
-                                      int index = entry.key;
-                                      var pictogram = entry.value;
-                                      bool isSelected = _selectedIndex.contains(
-                                        index,
-                                      );
+                                  spacing: 8.0,
+                                  runSpacing: 8.0,
+                                  children: _allPictograms.asMap().entries.map((entry) {
+                                    int index = entry.key;
+                                    var pictogram = entry.value;
+                                    bool isSelected = _selectedIndex.contains(index);
 
-                                      return GestureDetector(
-                                        onTap:
-                                            () => _toggleSelectionMode(index),
-                                        onLongPress:
-                                            () => _startSelection(index),
-                                        child: Column(
-                                          children: [
-                                            Container(
-                                              decoration: BoxDecoration(
-                                                border:
-                                                    isSelected
-                                                        ? Border.all(
-                                                          color: Colors.blue,
-                                                          width: 3.0,
-                                                        )
-                                                        : null,
-                                                borderRadius:
-                                                    BorderRadius.circular(80),
-                                              ),
-                                              padding: EdgeInsets.all(2),
-                                              child:
-                                                  pictogram['isLocal']
-                                                      ? Image.file(
-                                                        File(
-                                                          pictogram['imagePath'],
-                                                        ),
-                                                        height: 50,
-                                                      )
-                                                      : Image.network(
-                                                        pictogram['imageUrl'],
-                                                        height: 50,
-                                                      ),
+                                    return GestureDetector(
+                                      onTap: () => _toggleSelectionMode(index),
+                                      onLongPress: () => _startSelection(index),
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              border: isSelected
+                                                  ? Border.all(
+                                                      color: Colors.blue,
+                                                      width: 3.0,
+                                                    )
+                                                  : null,
+                                              borderRadius: BorderRadius.circular(80),
                                             ),
-
-                                            Text(pictogram['label']),
-                                          ],
-                                        ),
-                                      );
-                                    }).toList(),
-                              ),
+                                            padding: EdgeInsets.all(2),
+                                            child: pictogram['isLocal']
+                                                ? Image.file(
+                                                    File(pictogram['imagePath']),
+                                                    height: 50,
+                                                  )
+                                                : Image.network(
+                                                    pictogram['imageUrl'],
+                                                    height: 50,
+                                                  ),
+                                          ),
+                                          Text(pictogram['label']),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
                     ),
                   ],
                 ),
