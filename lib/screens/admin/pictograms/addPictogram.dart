@@ -17,12 +17,14 @@ class _AddPictogramState extends State<AddPictogram> {
   final TextEditingController _labelController = TextEditingController();
   String? _selectedCategory;
   final List<String> categories = [
-    "Animals",
-    "Objects",
-    "People",
-    "Nature",
-    "Fruit",
-    "Drink",
+    "animals",
+    "objects",
+    "people",
+    "nature",
+    "fruit",
+    "drink",
+    "feelings",
+    "deservers"
   ];
 
   bool _isUploading = false;
