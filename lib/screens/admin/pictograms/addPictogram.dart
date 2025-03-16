@@ -184,10 +184,12 @@ class _AddPictogramState extends State<AddPictogram> {
     });
   }
 
-  void _deleteSelectedItems(Set<int> index) {
+  void _deleteSelectedItems(Set<int> index) async {
     setState(() {
       _isLoading = true; // Indicando que a remoção está em andamento
     });
+
+    final userType = await getUserType(); 
 
     // Ordena os índices para que a remoção seja feita de trás para frente
     List<int> indexesToRemove = index.toList()..sort((a, b) => b.compareTo(a));
@@ -205,7 +207,7 @@ class _AddPictogramState extends State<AddPictogram> {
       }
 
       // Remover o pictograma da lista
-      if (pictogram['isLocal'] == true) {
+      if (pictogram['isLocal'] == true || userType == 'student') {
         _deletePictograms.deleteLocalImages(pictogram['imagePath']);
       } else {
         _deletePictograms.deleteCloudImages(context, pictogram['imageUrl']);
@@ -237,6 +239,9 @@ class _AddPictogramState extends State<AddPictogram> {
   Future<void> _loadPictograms() async {
     setState(() => _isLoading = true);
     try {
+      final userType = await getUserType();
+      List<Map<String, dynamic>>supabasePictogramsMap = [];
+      
       // Carregar pictogramas locais
       List<Pictogram> localPictograms =
           await localPictogramStorage.getPictograms();
@@ -252,7 +257,10 @@ class _AddPictogramState extends State<AddPictogram> {
         };
       }).toList();
 
-      // Carregar pictogramas do Supabase
+      
+
+      if(userType != 'student'){
+        // Carregar pictogramas do Supabase
       var supabasePictograms =
           await adminPictogram.PictogramStorage.getPictograms();
       print(
@@ -269,6 +277,7 @@ class _AddPictogramState extends State<AddPictogram> {
           "label": pictogram.label,
         };
       }).toList();
+      }
 
       setState(() {
         _allPictograms = [];
