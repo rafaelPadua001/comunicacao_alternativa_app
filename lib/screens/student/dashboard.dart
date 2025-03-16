@@ -1,3 +1,4 @@
+import 'package:comunicacao_alternativa_app/screens/admin/pictograms/addPictogram.dart';
 import 'package:flutter/material.dart';
 import '../../services/supabase_config.dart';
 import 'studentGrid.dart';
@@ -100,6 +101,12 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
                   MaterialPageRoute(builder: (context) => ProfileUser()),
                 );
               }
+              if(index == 3){
+                 Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddPictogram()),
+                );
+              }
               if (index == 4) {
                 // Navigator.push(
                 //   context,
@@ -125,6 +132,10 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
               NavigationRailDestination(
                 icon: Icon(Icons.person_3),
                 label: Text('account'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.image),
+                label: Text('pictograms'),
               ),
               NavigationRailDestination(
                 icon: Icon(Icons.settings),
