@@ -378,102 +378,110 @@ class _PictogramCardState extends State<PictogramCard> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Comunicação Alternativa"),
-        actions: <Widget>[
-          PopupMenuButton<String>(
-            onSelected: (String result) async {
-              if (result == 'add_image') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AddPictogramScreen()),
-                ).then((_) => _loadPictograms()); // Atualiza após adicionar
+  appBar: AppBar(
+    title: Text("Comunicação Alternativa"),
+    actions: <Widget>[
+      MenuAnchor(
+        builder: (BuildContext context, MenuController controller, Widget? child) {
+          return IconButton(
+            icon: Icon(Icons.more_vert),
+            onPressed: () {
+              if (controller.isOpen) {
+                controller.close();
+              } else {
+                controller.open();
               }
-              if (result == 'dashboard') {
+            },
+          );
+        },
+        menuChildren: [
+          MenuItemButton(
+            onPressed: () async {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddPictogramScreen()),
+              ).then((_) => _loadPictograms()); // Atualiza após adicionar
+            },
+            child: Row(
+              children: [
+                Icon(Icons.add_photo_alternate_rounded),
+                SizedBox(width: 10),
+                Text('Add Image'),
+              ],
+            ),
+          ),
+           MenuItemButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SetLanguage()),
+              );
+            },
+            child: Row(
+              children: [
+                Icon(Icons.settings_voice),
+                SizedBox(width: 10),
+                Text('Set Language'),
+              ],
+            ),
+          ),
+          if (currentUser != null)
+            MenuItemButton(
+              onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => UserSelectionScreen(),
                   ),
                 );
-              }
-              if (result == 'setLanguage') {
+              },
+              child: Row(
+                children: [
+                  Icon(Icons.dashboard),
+                  SizedBox(width: 10),
+                  Text('Dashboard'),
+                ],
+              ),
+            ),
+          if (currentUser == null)
+            MenuItemButton(
+              onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => SetLanguage()),
+                  MaterialPageRoute(
+                    builder: (context) => UserSelectionScreen(),
+                  ),
                 );
-              }
-              if (result == 'logout') {
-                await _handleLogout();
-              }
-            },
-            itemBuilder:
-                (BuildContext context) => [
-                  PopupMenuItem<String>(
-                    value: 'add_image',
-                    child: Row(
-                      children: [
-                        Icon(Icons.add_photo_alternate_rounded),
-                        SizedBox(width: 10),
-                        Text('Add Image'),
-                      ],
-                    ),
-                  ),
-                  if(currentUser != null)...[
-                    PopupMenuItem<String>(
-                    value: 'dashboard',
-                    child: Row(
-                      children: [
-                        Icon(Icons.dashboard),
-                        SizedBox(width: 10),
-                        Text('Dashboard'),
-                      ],
-                    ),
-                    ),
-                  ]
-                  else...[
-                    PopupMenuItem<String>(
-                    value: 'dashboard',
-                    child: Row(
-                      children: [
-                        Icon(Icons.login_outlined),
-                        SizedBox(width: 10),
-                        Text('Login'),
-                      ],
-                    ),
-                    ),
-                  ],
-                 
-                  PopupMenuItem<String>(
-                    value: 'setLanguage',
-                    child: Row(
-                      children: [
-                        Icon(Icons.settings_voice),
-                        SizedBox(width: 10),
-                        Text('set Language'),
-                      ],
-                    ),
-                  ),
-                  if(currentUser != null)...[
-                     PopupMenuItem<String>(
-                    value: 'logout',
-                    child: Row(
-                      children: [
-                        Icon(Icons.logout),
-                        SizedBox(width: 10),
-                        Text('logout'),
-                      ],
-                    ),
-                  ),
-                  ]
-                 
+              },
+              child: Row(
+                children: [
+                  Icon(Icons.login_outlined),
+                  SizedBox(width: 10),
+                  Text('Login'),
                 ],
-          ),
+              ),
+            ),
+         
+          if (currentUser != null)
+            MenuItemButton(
+              onPressed: () async {
+                await _handleLogout();
+              },
+              child: Row(
+                children: [
+                  Icon(Icons.logout),
+                  SizedBox(width: 10),
+                  Text('Logout'),
+                ],
+              ),
+            ),
         ],
       ),
-      body: Column(
-        children: [Expanded(child: _buildPictogramList(allPictograms))],
-      ),
-    );
+    ],
+  ),
+  body: Column(
+    children: [Expanded(child: _buildPictogramList(allPictograms))],
+  ),
+);
   }
 }
