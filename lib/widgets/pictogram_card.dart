@@ -127,6 +127,38 @@ class _PictogramCardState extends State<PictogramCard> {
     await flutterTts.speak(text);
   }
 
+
+ Future<String?> getUserType() async {
+  try {
+    final userId = SupabaseConfig.supabase.auth.currentUser?.id;
+    if (userId == null) {
+      print('Usuário não autenticado.');
+      return null;
+    }
+    print('UserId: $userId'); // Log para verificar o userId
+
+    // Executa a consulta na tabela `user_profiles`
+    final response = await SupabaseConfig.supabase
+        .from('user_profiles')
+        .select('usertype')
+        .eq('id', userId); // Filtra pelo ID do usuário
+
+    print('Resposta da consulta: $response'); // Log para verificar a resposta
+
+    // Verifica se houve erro na resposta
+    if (response.isEmpty) {
+      print('Nenhum perfil encontrado para o usuário com ID: $userId');
+      return null;
+    }
+
+    // Retorna o valor da coluna userType
+    return response[0]['usertype'];
+  } catch (e) {
+    print('Erro ao buscar usertype: $e');
+    return null;
+  }
+}
+
   //Função para captura do tipo de usuario para realizar logou
   Future<void> _handleLogout() async {
     final user = SupabaseConfig.supabase.auth.currentUser;
@@ -242,6 +274,9 @@ class _PictogramCardState extends State<PictogramCard> {
                       _selectedItems[allPictograms.indexOf(pictogram)] = false;
                     });
                   },
+                  onLongPress: () async {
+                    print('Muita maconha para nos');
+                  },
                   child: Card(
                     color:
                         _selectedItems[allPictograms.indexOf(pictogram)]
@@ -293,6 +328,9 @@ class _PictogramCardState extends State<PictogramCard> {
       ..._hivePictograms,
       ..._supabasePictograms,
     ];
+
+    final currentUser = SupabaseConfig.supabase.auth.currentSession;
+    
 
     // Verifica se a lista de pictogramas está vazia
     if (allPictograms.isEmpty) {
@@ -358,7 +396,8 @@ class _PictogramCardState extends State<PictogramCard> {
                       ],
                     ),
                   ),
-                  PopupMenuItem<String>(
+                  if(currentUser != null)...[
+                    PopupMenuItem<String>(
                     value: 'dashboard',
                     child: Row(
                       children: [
@@ -367,7 +406,21 @@ class _PictogramCardState extends State<PictogramCard> {
                         Text('Dashboard'),
                       ],
                     ),
-                  ),
+                    ),
+                  ]
+                  else...[
+                    PopupMenuItem<String>(
+                    value: 'dashboard',
+                    child: Row(
+                      children: [
+                        Icon(Icons.login_outlined),
+                        SizedBox(width: 10),
+                        Text('Login'),
+                      ],
+                    ),
+                    ),
+                  ],
+                 
                   PopupMenuItem<String>(
                     value: 'setLanguage',
                     child: Row(
@@ -378,7 +431,8 @@ class _PictogramCardState extends State<PictogramCard> {
                       ],
                     ),
                   ),
-                  PopupMenuItem<String>(
+                  if(currentUser != null)...[
+                     PopupMenuItem<String>(
                     value: 'logout',
                     child: Row(
                       children: [
@@ -388,6 +442,8 @@ class _PictogramCardState extends State<PictogramCard> {
                       ],
                     ),
                   ),
+                  ]
+                 
                 ],
           ),
         ],
