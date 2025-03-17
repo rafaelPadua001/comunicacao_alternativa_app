@@ -261,57 +261,80 @@ class _PictogramCardState extends State<PictogramCard> {
                 final pictogram = pictogramsInCategory[index];
 
                 return GestureDetector(
-                  onTap: () async {
-                    setState(() {
-                      _selectedItems[allPictograms.indexOf(pictogram)] = true;
-                    });
+  onTap: () async {
+    setState(() {
+      _selectedItems[allPictograms.indexOf(pictogram)] = true;
+    });
 
-                    await _speak(pictogram.label);
+    await _speak(pictogram.label);
 
-                    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(Duration(seconds: 1));
 
-                    setState(() {
-                      _selectedItems[allPictograms.indexOf(pictogram)] = false;
-                    });
-                  },
-                  onLongPress: () async {
-                    print('Muita maconha para nos');
-                  },
-                  child: Card(
-                    color:
-                        _selectedItems[allPictograms.indexOf(pictogram)]
-                            ? Colors.green
-                            : Colors.white,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        pictogram.isLocal
-                            ? Image.file(
-                              File(pictogram.imagePath),
-                              height: 50,
-                            ) // Para imagens locais
-                            : pictogram.imagePath.startsWith('http')
-                            ? Image.network(
-                              pictogram
-                                  .imagePath, // Para imagens remotas (URLs)
-                              height: 50,
-                            )
-                            : Image.asset(
-                              pictogram.imagePath,
-                              height: 50,
-                            ), // Para imagens embutidas
-                        SizedBox(height: 10),
-                        Text(
-                          pictogram.label,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
+    setState(() {
+      _selectedItems[allPictograms.indexOf(pictogram)] = false;
+    });
+  },
+  onLongPress: () async {
+    // Exibe um menu quando o usuário mantém o pressionamento longo
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: Icon(Icons.delete),
+                title: Text('Remover'),
+                onTap: () {
+                  // Lógica para remover o item
+                  setState(() {
+                    print('remove item ${allPictograms.indexOf(pictogram)}');
+                    allPictograms.remove(pictogram);
+                    _selectedItems.removeAt(allPictograms.indexOf(pictogram));
+                  });
+                  Navigator.pop(context); // Fecha o menu
+                },
+              ),
+              // Adicione mais opções aqui se necessário
+            ],
+          ),
+        );
+      },
+    );
+  },
+  child: Card(
+    color: _selectedItems[allPictograms.indexOf(pictogram)]
+        ? Colors.green
+        : Colors.white,
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        pictogram.isLocal
+            ? Image.file(
+                File(pictogram.imagePath),
+                height: 50,
+              ) // Para imagens locais
+            : pictogram.imagePath.startsWith('http')
+                ? Image.network(
+                    pictogram.imagePath, // Para imagens remotas (URLs)
+                    height: 50,
+                  )
+                : Image.asset(
+                    pictogram.imagePath,
+                    height: 50,
+                  ), // Para imagens embutidas
+        SizedBox(height: 10),
+        Text(
+          pictogram.label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    ),
+  ),
+);
               },
             ),
           ],
