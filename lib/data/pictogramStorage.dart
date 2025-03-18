@@ -36,7 +36,14 @@ class Pictogramstorage {
   }
 
   Future<void> deletePictograms(List<String> imagePaths) async {
-    await _initializeBox(); // Certifica-se de que o box está aberto
+  try {
+    // Certifica-se de que o box está aberto
+    await _initializeBox();
+
+    // Verifica se o box está inicializado corretamente
+    if (_box == null) {
+      throw Exception('Hive box não foi inicializado corretamente.');
+    }
 
     // Lista para armazenar as chaves que precisam ser deletadas
     List<dynamic> keysToDelete = [];
@@ -52,10 +59,13 @@ class Pictogramstorage {
     // Remove os itens do Hive usando as chaves corretas
     if (keysToDelete.isNotEmpty) {
       await _box!.deleteAll(keysToDelete);
-     
     }
 
+    // Compacta o box para otimizar o armazenamento (opcional)
     await _box!.compact();
-    
+  } catch (e) {
+    print('Erro ao deletar pictogramas: $e');
+    throw Exception('Falha ao deletar pictogramas: $e');
   }
+}
 }
