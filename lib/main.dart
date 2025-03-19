@@ -16,20 +16,21 @@ import 'package:hive_flutter/adapters.dart';
 import 'widgets/pictogram_card.dart' as widget;
 import 'models/student.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'services/supabase_config.dart'; // Importando a configuração
+import 'services/supabase_config.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Hive.initFlutter();
 
-  if(!Hive.isAdapterRegistered(0)){
+  if (!Hive.isAdapterRegistered(0)) {
     Hive.registerAdapter(modelPictogram.PictogramAdapter());
   }
-  if(!Hive.isAdapterRegistered(1)){
+  if (!Hive.isAdapterRegistered(1)) {
     Hive.registerAdapter(StudentAdapter());
   }
-  
+
   // Exclua a caixa existente (se necessário)
   //await Hive.deleteBoxFromDisk('pictograms');
 
@@ -41,7 +42,7 @@ void main() async {
   //   options: DefaultFirebaseOptions.currentPlatform,
   // );
 
-   await Supabase.initialize(
+  await Supabase.initialize(
     url: SupabaseConfig.supabaseUrl,
     anonKey: SupabaseConfig.supabaseAnonKey,
   );
@@ -57,48 +58,88 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Pictogram App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: Scaffold(
-        
-        body: Center(
-          child: widget.PictogramCard(),
+        colorScheme: ColorScheme(
+          primary: Color(0xFF5E4B6E),
+          secondary: Color(0xFF5E4B6E),
+          surface: Color(0xFFF5F5F5),
+          background: Color(0xFFF5F5F5),
+          error: Colors.red,
+          onPrimary: Colors.white,
+          onSecondary: Colors.black,
+          onSurface: Color(0xFF5E4B6E),
+          onBackground: Color(0xFF5E4B6E),
+          onError: Colors.white,
+          brightness: Brightness.dark, // ou Brightness.dark para tema escuro
+        ),
+        textTheme: TextTheme(
+          displayLarge: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+          titleLarge: GoogleFonts.lobster(
+            fontSize: 20,
+            fontStyle: FontStyle.normal,
+          ),
+          // bodyMedium: GoogleFonts.lobster(
+          //   fontSize: 18,
+          //   // fontWeight: FontWeight.bold
+          // ),
+          // displaySmall: GoogleFonts.hahmlet(fontSize: 14),
         ),
       ),
-       initialRoute: '/',
-       onGenerateRoute: (settings) {
+
+      home: Scaffold(body: Center(child: widget.PictogramCard())),
+      initialRoute: '/',
+      onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/loginStudent':
-            return MaterialPageRoute(builder: (context) => studentScreen.LoginStudentScreen());
+            return MaterialPageRoute(
+              builder: (context) => studentScreen.LoginStudentScreen(),
+            );
           case '/loginAdmin':
-            return MaterialPageRoute(builder: (context) => adminScreen.LoginAdminScreen());
+            return MaterialPageRoute(
+              builder: (context) => adminScreen.LoginAdminScreen(),
+            );
           case '/loginMaster':
-            return MaterialPageRoute(builder: (context) => masterScreen.LoginMasterScreen());
+            return MaterialPageRoute(
+              builder: (context) => masterScreen.LoginMasterScreen(),
+            );
           case '/dashboardAdmin':
-            return MaterialPageRoute(builder: (context) => dashboardScreen.DashboarAdmindScreen());  // Definindo a rota
+            return MaterialPageRoute(
+              builder: (context) => dashboardScreen.DashboarAdmindScreen(),
+            ); // Definindo a rota
           case '/dashboardStudent':
-            return MaterialPageRoute(builder: (context) => dashboardStudentScreen.DashboarStudentScreen());
+            return MaterialPageRoute(
+              builder:
+                  (context) => dashboardStudentScreen.DashboarStudentScreen(),
+            );
           case '/dashboardMaster':
-            return MaterialPageRoute(builder: (context) => dashboardMasterScreen.DashboarMasterScreen());
+            return MaterialPageRoute(
+              builder:
+                  (context) => dashboardMasterScreen.DashboarMasterScreen(),
+            );
           default:
-            return MaterialPageRoute(builder: (context) => userselectionScreen.UserSelectionScreen());
+            return MaterialPageRoute(
+              builder: (context) => userselectionScreen.UserSelectionScreen(),
+            );
         }
       },
       // routes: {
-       
-      
+
       //   '/dasboardAdmin': (context) => dasboardScreen.DashboarAdmindScreen(),
       //   ...adminRoutes.AdminRoutes.getRoutes(),
       // },
       onUnknownRoute: (settings) {
         return MaterialPageRoute(
-          builder: (context) => Scaffold(
-            appBar: AppBar(title: Text('Erro')),
-            body: Center(child: Text('Rota não encontrada: ${settings.name}')),
-          ),
+          builder:
+              (context) => Scaffold(
+                appBar: AppBar(title: Text('Erro')),
+                body: Center(
+                  child: Text('Rota não encontrada: ${settings.name}'),
+                ),
+              ),
         );
       },
     );
   }
 }
-
