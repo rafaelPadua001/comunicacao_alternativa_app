@@ -51,3 +51,4 @@ flutter:
 flutter_native_splash:
   color: "FFFFFF" # Cor de fundo
   image: assets/icon/ic_launcher.png # Imagem da splash screen
+  fullscreen: true
