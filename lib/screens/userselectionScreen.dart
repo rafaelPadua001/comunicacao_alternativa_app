@@ -1,5 +1,6 @@
 import 'package:comunicacao_alternativa_app/services/supabase_config.dart';
 import 'package:flutter/material.dart';
+import '../widgets/fullScreenDialog.dart';
 
 class UserSelectionScreen extends StatefulWidget {
   @override
@@ -12,12 +13,14 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
   @override
   void initState() {
     super.initState();
+     WidgetsBinding.instance.addPostFrameCallback((_) {
     _checkLoginStatus();
+  });
   }
 
   void _checkLoginStatus() async {
     final user = SupabaseConfig.supabase.auth.currentUser;
-
+    
     if (user != null) {
       try {
         final response =
@@ -62,13 +65,26 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
               break;
           }
         }
+        
       } catch (e) {}
-      // Usuário já logado
-      // Future.microtask(() {
-      //   print(user);
-      //   Navigator.restorablePushReplacementNamed(context, '/dashboardAdmin');
-      // });
+     
     }
+    else
+        {
+          await _fullScreenDialog(context);
+          //print(_fullScreenDialog());
+        }
+  }
+
+  Future<void> _fullScreenDialog(BuildContext context) async {
+    if(!mounted) return;
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context){
+        return Fullscreendialog();
+      }
+    );
   }
 
   void _navigateToLogin() {
