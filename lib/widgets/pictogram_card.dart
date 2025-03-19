@@ -226,88 +226,96 @@ class _PictogramCardState extends State<PictogramCard> {
     return groupedPictograms;
   }
 
- void _showPictogramOptions(
-  BuildContext context,
-  Pictogram pictogram,
-  List<Pictogram> allPictograms,
-) async {
-  final userType = await getUserType();
+  void _showPictogramOptions(
+    BuildContext context,
+    Pictogram pictogram,
+    List<Pictogram> allPictograms,
+  ) async {
+    final userType = await getUserType();
 
-  return showModalBottomSheet(
-    context: context,
-    builder: (BuildContext modalContext) {
-      return Container(
-        child: Wrap(
-          children: <Widget>[
-            if (userType == 'student' && pictogram.isLocal)
-              ListTile(
-                leading: Icon(Icons.delete),
-                title: Text('Remover'),
-                onTap: () async {
-                  Navigator.pop(modalContext); // Fecha o modal primeiro
+    return showModalBottomSheet(
+      context: context,
+      builder: (BuildContext modalContext) {
+        return Container(
+          child: Wrap(
+            children: <Widget>[
+              if (userType == 'student' && pictogram.isLocal)
+                ListTile(
+                  leading: Icon(Icons.delete),
+                  title: Text('Remover'),
+                  onTap: () async {
+                    Navigator.pop(modalContext); // Fecha o modal primeiro
 
-                  final confirmDialog = await _showConfirmDialog(context);
-                  if (confirmDialog == true) {
-                    await _removePictogram(pictogram, allPictograms); // Aguarda a conclusão
-                  }
-                },
-              ),
+                    final confirmDialog = await _showConfirmDialog(context);
+                    if (confirmDialog == true) {
+                      await _removePictogram(
+                        pictogram,
+                        allPictograms,
+                      ); // Aguarda a conclusão
+                    }
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<bool?> _showConfirmDialog(BuildContext context) async {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text('Confirmar Remoção'),
+          content: Text('Tem certeza que deseja remover este pictograma?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pop(
+                  dialogContext,
+                  false,
+                ); // Retorna false (não confirmou)
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, true); // Retorna true (confirmou)
+              },
+              child: Text('Remover'),
+            ),
           ],
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
-Future<bool?> _showConfirmDialog(BuildContext context) async {
-  return showDialog<bool>(
-    context: context,
-    builder: (BuildContext dialogContext) {
-      return AlertDialog(
-        title: Text('Confirmar Remoção'),
-        content: Text('Tem certeza que deseja remover este pictograma?'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.pop(dialogContext, false); // Retorna false (não confirmou)
-            },
-            child: Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(dialogContext, true); // Retorna true (confirmou)
-            },
-            child: Text('Remover'),
-          ),
-        ],
-      );
-    },
-  );
-}
+  Future<void> _removePictogram(
+    Pictogram pictogram,
+    List<Pictogram> allPictograms,
+  ) async {
+    final index = _hivePictograms.indexOf(pictogram);
+    if (index != -1) {
+      try {
+        // Chama o método para deletar o pictograma do armazenamento
+        await _storage.deletePictograms([pictogram.imagePath]);
 
-Future<void> _removePictogram(Pictogram pictogram, List<Pictogram> allPictograms) async {
-  final index = _hivePictograms.indexOf(pictogram);
-  if (index != -1) {
-    try {
-      // Chama o método para deletar o pictograma do armazenamento
-      await _storage.deletePictograms([pictogram.imagePath]);
-
-      // Usando setState para garantir que a UI seja atualizada corretamente
-      if (mounted) {
-        setState(() {
-          // Remove o pictograma da lista sem criar uma nova lista
-          _hivePictograms.removeAt(index);
-          _selectedItems.removeAt(index); // Remove da lista de itens selecionados também
-        });
+        // Usando setState para garantir que a UI seja atualizada corretamente
+        if (mounted) {
+          setState(() {
+            // Remove o pictograma da lista sem criar uma nova lista
+            _hivePictograms.removeAt(index);
+            _selectedItems.removeAt(
+              index,
+            ); // Remove da lista de itens selecionados também
+          });
+        }
+      } catch (e) {
+        print('Erro ao remover o pictograma: $e');
       }
-    } catch (e) {
-      print('Erro ao remover o pictograma: $e');
     }
   }
-}
-
-
-
 
   // Função para construir a lista de pictogramas por categoria
   Widget _buildPictogramList(List<Pictogram> allPictograms) {
@@ -324,12 +332,18 @@ Future<void> _removePictogram(Pictogram pictogram, List<Pictogram> allPictograms
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              padding: const EdgeInsets.symmetric(vertical: 1.0),
               child: Text(
                 category,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
             ),
+            Divider(
+              color: Colors.purple,
+              thickness: 0.1,
+              height: 0.5,
+            ),
+            SizedBox(height: 15.0,),
             GridView.builder(
               shrinkWrap: true,
               physics:
@@ -337,8 +351,8 @@ Future<void> _removePictogram(Pictogram pictogram, List<Pictogram> allPictograms
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
                 childAspectRatio: 1,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
+                crossAxisSpacing: 3,
+                mainAxisSpacing: 3,
               ),
               itemCount: pictogramsInCategory.length,
               itemBuilder: (context, index) {
@@ -368,7 +382,7 @@ Future<void> _removePictogram(Pictogram pictogram, List<Pictogram> allPictograms
                   child: Card(
                     color:
                         _selectedItems[allPictograms.indexOf(pictogram)]
-                            ? Colors.green
+                            ? Colors.purple
                             : Colors.white,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -376,19 +390,19 @@ Future<void> _removePictogram(Pictogram pictogram, List<Pictogram> allPictograms
                         pictogram.isLocal
                             ? Image.file(
                               File(pictogram.imagePath),
-                              height: 50,
+                              height: 80,
                             ) // Para imagens locais
                             : pictogram.imagePath.startsWith('http')
                             ? Image.network(
                               pictogram
                                   .imagePath, // Para imagens remotas (URLs)
-                              height: 50,
+                              height: 80,
                             )
                             : Image.asset(
                               pictogram.imagePath,
-                              height: 50,
+                              height: 80,
                             ), // Para imagens embutidas
-                        SizedBox(height: 10),
+                        SizedBox(height: 3),
                         Text(
                           pictogram.label,
                           style: TextStyle(
@@ -402,6 +416,7 @@ Future<void> _removePictogram(Pictogram pictogram, List<Pictogram> allPictograms
                 );
               },
             ),
+            SizedBox(height: 30.0,)
           ],
         );
       },
