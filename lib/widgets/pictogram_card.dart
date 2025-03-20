@@ -181,10 +181,10 @@ class _PictogramCardState extends State<PictogramCard> {
           print("Tipo de usuário: $userType");
 
           // Logout no Supabase
-          final logoutResponse = await SupabaseConfig.supabase.auth.signOut();
+          await SupabaseConfig.supabase.auth.signOut();
           print("Logout realizado!");
 
-          Navigator.pushNamed(context, '/');
+          Navigator.pushReplacementNamed(context, '/');
           // Redirecionamento correto
           // switch (userType) {
           //   case 'admin':
