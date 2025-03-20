@@ -181,24 +181,25 @@ class _PictogramCardState extends State<PictogramCard> {
           print("Tipo de usuário: $userType");
 
           // Logout no Supabase
-          await SupabaseConfig.supabase.auth.signOut();
+          final logoutResponse = await SupabaseConfig.supabase.auth.signOut();
           print("Logout realizado!");
 
+          Navigator.pushNamed(context, '/');
           // Redirecionamento correto
-          switch (userType) {
-            case 'admin':
-              Navigator.pushReplacementNamed(context, '/loginAdmin');
-              break;
-            case 'student':
-              Navigator.pushReplacementNamed(context, '/loginStudent');
-              break;
-            case 'professor':
-              Navigator.pushReplacementNamed(context, '/loginProfessor');
-              break;
-            default:
-              Navigator.pushReplacementNamed(context, '/userselectionScreen');
-              break;
-          }
+          // switch (userType) {
+          //   case 'admin':
+          //     Navigator.pushReplacementNamed(context, '/loginAdmin');
+          //     break;
+          //   case 'student':
+          //     Navigator.pushReplacementNamed(context, '/loginStudent');
+          //     break;
+          //   case 'professor':
+          //     Navigator.pushReplacementNamed(context, '/loginProfessor');
+          //     break;
+          //   default:
+          //     Navigator.pushReplacementNamed(context, '/userselectionScreen');
+          //     break;
+          // }
         } else {
           print("Erro: campo 'userType' não encontrado.");
         }
