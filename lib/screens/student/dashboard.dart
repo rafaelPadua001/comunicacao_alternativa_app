@@ -1,3 +1,4 @@
+import 'package:comunicacao_alternativa_app/models/admin/admin.dart';
 import 'package:comunicacao_alternativa_app/screens/admin/pictograms/addPictogram.dart';
 import 'package:flutter/material.dart';
 import '../../services/supabase_config.dart';
@@ -17,6 +18,7 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
   String? avatarImage;
   String? userType;
   Map<String, dynamic>? profileUser;
+  AdminModel _adminModel = AdminModel();
 
   @override
   void initState() {
@@ -52,23 +54,25 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
 
   Future<void> fetchUserProfile() async {
     final user = SupabaseConfig.supabase.auth.currentUser;
-  
+
     if (user != null) {
       try {
-        final getProfileUser = await SupabaseConfig.supabase
-            .from('user_profiles')
-            .select()
-            .eq('id', user.id)
-            .maybeSingle();
+        final getProfileUser =
+            await SupabaseConfig.supabase
+                .from('user_profiles')
+                .select()
+                .eq('id', user.id)
+                .maybeSingle();
 
         if (getProfileUser != null) {
           setState(() {
             userName = getProfileUser['displayname'];
-            avatarImage = getProfileUser['photourl'] != null ? getProfileUser['photourl'] : null;
+            avatarImage =
+                getProfileUser['photourl'] != null
+                    ? getProfileUser['photourl']
+                    : null;
             userType = getProfileUser['usertype'];
-     
           });
-          
         } else {
           print('No profile found for the user.');
         }
@@ -76,6 +80,12 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
         print('Error fetching profile: $e');
       }
     }
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    final logout = await _adminModel.logout();
+
+    Navigator.pushNamed(context, '/');
   }
 
   @override
@@ -87,7 +97,7 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
         children: [
           NavigationRail(
             selectedIndex: 0,
-            onDestinationSelected: (int index) {
+            onDestinationSelected: (int index) async {
               if (index == 1) {
                 Navigator.push(
                   context,
@@ -95,14 +105,13 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
                 );
               }
               if (index == 2) {
-            
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ProfileUser()),
                 );
               }
-              if(index == 3){
-                 Navigator.push(
+              if (index == 3) {
+                Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => AddPictogram()),
                 );
@@ -113,16 +122,25 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
                 //   MaterialPageRoute(builder: (context) => SettingsGrid()),
                 // );
               }
+              if (index == 5) {
+                final logoutResponse = await _handleLogout(context);
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MyApp()),
+                );
+              }
             },
             labelType: NavigationRailLabelType.all,
-            destinations:  <NavigationRailDestination>[
+            destinations: <NavigationRailDestination>[
               NavigationRailDestination(
                 icon: CircleAvatar(
-                  backgroundImage: avatarImage != null ? NetworkImage(avatarImage!) : null,
+                  backgroundImage:
+                      avatarImage != null ? NetworkImage(avatarImage!) : null,
                   child: avatarImage == null ? Icon(Icons.person) : null,
                   radius: 28,
-                ),  
-                
+                ),
+
                 label: Text('${userName}'),
               ),
               NavigationRailDestination(
@@ -140,6 +158,10 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
               NavigationRailDestination(
                 icon: Icon(Icons.settings),
                 label: Text('Settings'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.logout),
+                label: Text('logout'),
               ),
             ],
           ),
