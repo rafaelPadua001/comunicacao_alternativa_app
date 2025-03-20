@@ -1,4 +1,5 @@
 // import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/supabase_config.dart';
 
@@ -63,6 +64,7 @@ Future<void> updateUserProfile(String userId, String newRole) async {
   // Função para sair
   Future<void> logout() async {
     await _supabase.auth.signOut();
+    ;
   }
 
   // Função para verificar se o usuário está logado

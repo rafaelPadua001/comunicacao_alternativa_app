@@ -1,3 +1,4 @@
+import '../../models/admin/admin.dart';
 import 'settingsGrid.dart';
 import 'students/studentsGrid.dart';
 import 'masters/mastersGrid.dart';
@@ -6,8 +7,15 @@ import 'package:flutter/material.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/supabase_config.dart';
 
-
 class DashboarAdmindScreen extends StatelessWidget {
+  AdminModel _adminModel = AdminModel();
+  
+  Future<void> _handleLogout(BuildContext context) async {
+    final logout = await _adminModel.logout();
+
+    Navigator.pushNamed(context, '/');
+  }
+
   @override
   Widget build(BuildContext context) {
     // Obter o usuário logado
@@ -19,33 +27,38 @@ class DashboarAdmindScreen extends StatelessWidget {
           // Navegação lateral com o NavigatorRail
           NavigationRail(
             selectedIndex: 0,
-            onDestinationSelected: (int index) {
+            onDestinationSelected: (int index) async {
               if (index == 0) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => MyApp()),
                 );
               }
-              if(index == 1){
+              if (index == 1) {
                 print('masters clicked');
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => MastersgsGrid()
-                    ),
-                  );
+                  MaterialPageRoute(builder: (context) => MastersgsGrid()),
+                );
               }
-              if(index == 2){
+              if (index == 2) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => StudentsgsGrid()),
-                  );
+                  MaterialPageRoute(builder: (context) => StudentsgsGrid()),
+                );
               }
               if (index == 4) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => SettingsGrid()),
+                );
+              }
+              if (index == 5) {
+                final logoutResponse = await _handleLogout(context);
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MyApp()),
                 );
               }
             },
@@ -69,7 +82,11 @@ class DashboarAdmindScreen extends StatelessWidget {
               ),
               NavigationRailDestination(
                 icon: Icon(Icons.settings),
-                label: Text('Settings'),
+                label: Text('settings'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.logout),
+                label: Text('logout'),
               ),
             ],
           ),
