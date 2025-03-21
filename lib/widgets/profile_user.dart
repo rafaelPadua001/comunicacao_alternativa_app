@@ -17,6 +17,7 @@ class _ProfileUserState extends State<ProfileUser> {
   File? _imageFile;
   bool isEditingName = false;
   bool isEditingEmail = false;
+  bool _isExpanded = true;
   TextEditingController _nameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
 
@@ -222,6 +223,23 @@ class _ProfileUserState extends State<ProfileUser> {
                       if (profileUser != null) ...[
                         ExpansionTile(
                           title: Text('Profile photo'),
+                          initiallyExpanded: _isExpanded,
+                          onExpansionChanged: (expanded) {
+                            setState(() {
+                              _isExpanded = expanded;
+                            });
+                          },
+                          tilePadding:
+                              EdgeInsets.zero, // Remove o padding interno
+                          childrenPadding:
+                              EdgeInsets.zero, // Remove o padding dos filhos
+                          collapsedBackgroundColor: Colors.transparent,
+                          backgroundColor:
+                              Colors
+                                  .transparent, // Remove o fundo quando expandido
+                          collapsedShape:
+                              Border(), // Remove a borda quando recolhido
+                          shape: Border(),
                           children: [
                             if (_imageFile != null) ...[
                               Image.file(
@@ -250,23 +268,37 @@ class _ProfileUserState extends State<ProfileUser> {
                               ElevatedButton(
                                 onPressed: () {
                                   _showImageSourceBottomSheet(context);
+                                  setState(() {
+                                    _isExpanded = !_isExpanded;
+                                  });
                                 },
                                 child: Text('Upload Imagem'),
                               ),
                             ],
                           ],
                         ),
+                        
                         SizedBox(height: 20),
 
                         // Accordion para o nome
                         ExpansionTile(
                           title: Text('Personal'),
+                          initiallyExpanded: _isExpanded,
+                          onExpansionChanged: (expanded) {
+                            _isExpanded = expanded;
+                          },
                           children: [
                             if (profileUser['displayname'] != null) ...[
                               Row(
                                 children: [
                                   if (!isEditingName)
-                                    Text('Nome: ${profileUser['displayname']}'),
+                                    Text(
+                                      'name: ',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  Text('${profileUser['displayname']}'),
                                   if (isEditingName)
                                     Expanded(
                                       child: TextField(
@@ -295,13 +327,14 @@ class _ProfileUserState extends State<ProfileUser> {
                                       isEditingName ? 'Save' : 'Edit',
                                     ),
                                   ),
-                                ],
-                              ),
-                              SizedBox(height: 5),
-                              Row(
-                                children: [
                                   if (!isEditingEmail)
-                                    Text('Email: ${profileUser['email']}'),
+                                    Text(
+                                      'Email: ',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  Text('${profileUser['email']}'),
                                   if (isEditingEmail)
                                     Expanded(
                                       child: TextField(
@@ -312,6 +345,7 @@ class _ProfileUserState extends State<ProfileUser> {
                                         ),
                                       ),
                                     ),
+                                  /*email Text */
                                   TextButton(
                                     onPressed: (() async {
                                       setState(() {
@@ -331,10 +365,39 @@ class _ProfileUserState extends State<ProfileUser> {
                                   ),
                                 ],
                               ),
+                              SizedBox(height: 5),
+                              Row(
+                                children: [
+                                  Text('Tipo de usuário: '),
+                                  Text(
+                                    '${profileUser['usertype']}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 8),
                               Row(
                                 children: [
                                   Text(
-                                    'Tipo de usuário: ${profileUser['usertype']}',
+                                    'Criado em: ',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${profileUser['created_at'].toString().split('T')[0]}',
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'As :',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${profileUser['created_at'].toString().split('T')[1].substring(0, 5)}',
                                   ),
                                 ],
                               ),
@@ -369,6 +432,10 @@ class _ProfileUserState extends State<ProfileUser> {
                                               _nameController.text;
                                           await _updateProfile();
                                         }
+
+                                        setState(() {
+                                          _isExpanded = !_isExpanded;
+                                        });
                                         // profileUser['diplayname'] = _nameController.text;
                                       });
                                     }),
@@ -379,14 +446,6 @@ class _ProfileUserState extends State<ProfileUser> {
                           ],
                         ),
                         SizedBox(height: 10),
-
-                        // Accordion para a data de criação
-                        ExpansionTile(
-                          title: Text('Criado em'),
-                          children: [
-                            Text('Criado em: ${profileUser['created_at']}'),
-                          ],
-                        ),
                       ] else
                         Text('Carregando Perfil...'),
                     ],
