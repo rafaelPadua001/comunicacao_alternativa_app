@@ -57,6 +57,7 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
   Future<void> fetchUserProfile() async {
     final user = SupabaseConfig.supabase.auth.currentUser;
 
+    await checkPasswordChange();
     if (user != null) {
       try {
         final getProfileUser =
@@ -85,6 +86,65 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
     }
   }
 
+   Future<void> checkPasswordChange() async {
+    final user = SupabaseConfig.supabase.auth.currentUser;
+
+    if (user != null) {
+      try {
+        final response = await SupabaseConfig.supabase
+            .from('user_profiles')
+            .select('created_at, updated_at')
+            .eq('id', user.id)
+            .maybeSingle();
+
+        if (response != null) {
+          final createdAt = DateTime.parse(response['created_at']);
+          final lastLogin = DateTime.parse(response['updated_at']);
+
+          if (lastLogin.isAtSameMomentAs(createdAt)) {
+            print('O usuário NÃO alterou a senha desde o primeiro login.');
+            await _showDialog(context);
+            // Navigator.pushNamed(context, '/changePassword');
+          } else {
+            print('O usuário alterou a senha após o primeiro login.');
+          }
+        } else {
+          print('Perfil do usuário não encontrado.');
+        }
+      } catch (e) {
+        print('Erro ao verificar alteração de senha: $e');
+      }
+    }
+  }
+
+ Future<void> _showDialog(BuildContext context) async {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Alterar Senha'),
+        content: Text('Após o primeiro acesso você deve trocar sua senha...'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              // Fecha o dialog
+              Navigator.of(context).pop();
+            },
+            child: Text('Fechar'),
+          ),
+          TextButton(
+            onPressed: () {
+              // Ação ao pressionar o botão "OK"
+              print('Botão OK pressionado');
+              Navigator.of(context).pop();
+            },
+            child: Text('Trocar senha'),
+          ),
+        ],
+      );
+    },
+  );
+}
   Future<void> _handleLogout(BuildContext context) async {
     final logout = await _adminModel.logout();
 
