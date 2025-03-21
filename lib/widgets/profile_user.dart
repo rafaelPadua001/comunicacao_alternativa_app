@@ -168,9 +168,12 @@ class _ProfileUserState extends State<ProfileUser> {
 
       setState(() {
         imageUrl = signedUrlResponse;
-          // Atualiza o AvatarProvider com a nova URL da imagem
-    final avatarProvider = Provider.of<AvatarProvider>(context, listen: false);
-    avatarProvider.updateAvatarImage(imageUrl.toString());
+        // Atualiza o AvatarProvider com a nova URL da imagem
+        final avatarProvider = Provider.of<AvatarProvider>(
+          context,
+          listen: false,
+        );
+        avatarProvider.updateAvatarImage(imageUrl.toString());
       });
     } catch (e) {
       print('Erro durante o upload: $e');
