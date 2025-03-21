@@ -2,11 +2,13 @@ import 'package:comunicacao_alternativa_app/models/admin/admin.dart';
 import 'package:comunicacao_alternativa_app/screens/admin/pictograms/addPictogram.dart';
 import 'package:flutter/material.dart';
 import '../../services/supabase_config.dart';
-import 'studentGrid.dart';
+// import 'studentGrid.dart';
 import '../../main.dart';
 import '../../widgets/profile_user.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
+// import 'dart:io';
+// import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import '../../notifier/notifier.dart';
 
 class DashboarStudentScreen extends StatefulWidget {
   @override
@@ -53,34 +55,31 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
   }
 
   Future<void> fetchUserProfile() async {
-    final user = SupabaseConfig.supabase.auth.currentUser;
+  final user = SupabaseConfig.supabase.auth.currentUser;
 
-    if (user != null) {
-      try {
-        final getProfileUser =
-            await SupabaseConfig.supabase
-                .from('user_profiles')
-                .select()
-                .eq('id', user.id)
-                .maybeSingle();
+  if (user != null) {
+    try {
+      final getProfileUser = await SupabaseConfig.supabase
+          .from('user_profiles')
+          .select()
+          .eq('id', user.id)
+          .maybeSingle();
 
-        if (getProfileUser != null) {
-          setState(() {
-            userName = getProfileUser['displayname'];
-            avatarImage =
-                getProfileUser['photourl'] != null
-                    ? getProfileUser['photourl']
-                    : null;
-            userType = getProfileUser['usertype'];
-          });
-        } else {
-          print('No profile found for the user.');
-        }
-      } catch (e) {
-        print('Error fetching profile: $e');
+      if (getProfileUser != null) {
+        final avatarProvider = Provider.of<AvatarProvider>(context, listen: false);
+        setState(() {
+          userName = getProfileUser['displayname'];
+          userType = getProfileUser['usertype'];
+        });
+        avatarProvider.updateAvatarImage(getProfileUser['photourl']);
+      } else {
+        print('No profile found for the user.');
       }
+    } catch (e) {
+      print('Error fetching profile: $e');
     }
   }
+}
 
   Future<void> _handleLogout(BuildContext context) async {
     final logout = await _adminModel.logout();
@@ -133,14 +132,18 @@ class _DashboarStudentScreenState extends State<DashboarStudentScreen> {
             },
             labelType: NavigationRailLabelType.all,
             destinations: <NavigationRailDestination>[
-              NavigationRailDestination(
-                icon: CircleAvatar(
-                  backgroundImage:
-                      avatarImage != null ? NetworkImage(avatarImage!) : null,
-                  child: avatarImage == null ? Icon(Icons.person) : null,
-                  radius: 28,
+             NavigationRailDestination(
+                icon: Consumer<AvatarProvider>(
+                  builder: (context, avatarProvider, child) {
+                    return CircleAvatar(
+                      backgroundImage: avatarProvider.avatarImage != null
+                          ? NetworkImage(avatarProvider.avatarImage!)
+                          : null,
+                      child: avatarProvider.avatarImage == null ? Icon(Icons.person) : null,
+                      radius: 28,
+                    );
+                  },
                 ),
-
                 label: Text('${userName}'),
               ),
               NavigationRailDestination(
