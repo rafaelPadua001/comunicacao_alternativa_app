@@ -1,12 +1,11 @@
-import 'package:comunicacao_alternativa_app/models/admin/admin.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:comunicacao_alternativa_app/models/admin/admin.dart';
 import '../../services/supabase_config.dart';
-// import 'studentGrid.dart';
 import '../../main.dart';
 import '../../widgets/profile_user.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 import 'settingsGrid.dart';
+import '../../notifier/notifier.dart'; // Importe o AvatarProvider
 
 class DashboarMasterScreen extends StatefulWidget {
   @override
@@ -15,9 +14,7 @@ class DashboarMasterScreen extends StatefulWidget {
 
 class _DashboarMasterScreenState extends State<DashboarMasterScreen> {
   String? userName;
-  String? avatarImage;
   String? userType;
-  Map<String, dynamic>? profileUser;
   AdminModel _adminModel = AdminModel();
 
   @override
@@ -25,7 +22,7 @@ class _DashboarMasterScreenState extends State<DashboarMasterScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       checkEmailVerification();
-      fetchUserProfile(); // Fetch user profile data when the widget initializes
+      fetchUserProfile(); // Carrega o perfil do usuário ao inicializar
     });
   }
 
@@ -65,14 +62,15 @@ class _DashboarMasterScreenState extends State<DashboarMasterScreen> {
                 .maybeSingle();
 
         if (getProfileUser != null) {
+          final avatarProvider = Provider.of<AvatarProvider>(
+            context,
+            listen: false,
+          );
           setState(() {
             userName = getProfileUser['displayname'];
-            avatarImage =
-                getProfileUser['photourl'] != null
-                    ? getProfileUser['photourl']
-                    : null;
             userType = getProfileUser['usertype'];
           });
+          avatarProvider.updateAvatarImage(getProfileUser['photourl']);
         } else {
           print('No profile found for the user.');
         }
@@ -84,7 +82,6 @@ class _DashboarMasterScreenState extends State<DashboarMasterScreen> {
 
   Future<void> _handleLogout(BuildContext context) async {
     final logout = await _adminModel.logout();
-
     Navigator.pushNamed(context, '/');
   }
 
@@ -118,7 +115,6 @@ class _DashboarMasterScreenState extends State<DashboarMasterScreen> {
               }
               if (index == 4) {
                 final logoutResponse = await _handleLogout(context);
-
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => MyApp()),
@@ -128,14 +124,24 @@ class _DashboarMasterScreenState extends State<DashboarMasterScreen> {
             labelType: NavigationRailLabelType.all,
             destinations: <NavigationRailDestination>[
               NavigationRailDestination(
-                icon: CircleAvatar(
-                  backgroundImage:
-                      avatarImage != null ? NetworkImage(avatarImage!) : null,
-                  child: avatarImage == null ? Icon(Icons.person) : null,
-                  radius: 28,
+                icon: Consumer<AvatarProvider>(
+                  builder: (context, avatarProvider, child) {
+                    return CircleAvatar(
+                      backgroundImage:
+                          avatarProvider.avatarImage != null
+                              ? NetworkImage(avatarProvider.avatarImage!)
+                              : null,
+                      child:
+                          avatarProvider.avatarImage == null
+                              ? Icon(Icons.person)
+                              : null,
+                      radius: 28,
+                    );
+                  },
                 ),
-
-                label: Text('${userName}'),
+                label: Text(
+                  userName ?? 'Carregando...',
+                ), // Exibe o nome do usuário
               ),
               NavigationRailDestination(
                 icon: Icon(Icons.home),
@@ -161,16 +167,21 @@ class _DashboarMasterScreenState extends State<DashboarMasterScreen> {
               child: Column(
                 children: [
                   user == null
-                      ? Text('Nenhum usuário logado')
-                      : Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 20),
-                            Text('Bem-vindo, ${userType ?? userName}'),
-                            SizedBox(height: 20),
-                          ],
-                        ),
+                      ? Text(
+                        'Nenhum usuário logado',
+                      ) // Caso nenhum usuário esteja logado
+                      : Column(
+                        mainAxisAlignment:
+                            MainAxisAlignment.start, // Alinha ao topo
+                        children: [
+                          SizedBox(
+                            height: 20,
+                          ), // Adiciona um espaço no topo da Column
+                          Text(
+                            'Bem-vindo, ${userType ?? userName}',
+                          ), // Exibe o e-mail do usuário
+                          SizedBox(height: 20),
+                        ],
                       ),
                 ],
               ),
