@@ -4,6 +4,8 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:provider/provider.dart';
+import '../../notifier/notifier.dart';
 
 class ProfileUser extends StatefulWidget {
   @override
@@ -17,6 +19,7 @@ class _ProfileUserState extends State<ProfileUser> {
   File? _imageFile;
   bool isEditingName = false;
   bool isEditingEmail = false;
+  bool _isExpanded = true;
   TextEditingController _nameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
 
@@ -140,39 +143,35 @@ class _ProfileUserState extends State<ProfileUser> {
       final filePath =
           '${user!.id}/${DateTime.now().millisecondsSinceEpoch}.jpg';
 
-      // Converte o XFile em File
+      // Obtém os bytes da imagem
       final fileBytes = await image.readAsBytes();
-      final tempDir =
-          await Directory.systemTemp.create(); // Cria o diretório temporário
-      final tempFile = File(
-        '${tempDir.path}/temp_image.jpg',
-      ); // Cria um arquivo temporário
-      await tempFile.writeAsBytes(
-        fileBytes,
-      ); // Salva os bytes no arquivo temporário
 
-      // Faz o upload da imagem para o Supabase Storage
+      // Faz o upload diretamente a partir dos bytes no Supabase Storage
       final uploadResponse = await SupabaseConfig.supabase.storage
           .from('profile_images')
-          .upload(filePath, tempFile);
+          .uploadBinary(
+            filePath,
+            fileBytes,
+            fileOptions: FileOptions(contentType: 'image/jpeg'),
+          );
 
       // Gera uma URL assinada válida por 1 hora (3600 segundos)
       final signedUrlResponse = await SupabaseConfig.supabase.storage
           .from('profile_images')
-          .createSignedUrl(filePath, 3600);
+          .getPublicUrl(filePath);
 
       // Atualiza o perfil do usuário com a nova URL assinada da imagem
-      final updateResponse = await SupabaseConfig.supabase
+      await SupabaseConfig.supabase
           .from('user_profiles')
           .update({'photourl': signedUrlResponse})
           .eq('id', user!.id);
 
       setState(() {
         imageUrl = signedUrlResponse;
+          // Atualiza o AvatarProvider com a nova URL da imagem
+    final avatarProvider = Provider.of<AvatarProvider>(context, listen: false);
+    avatarProvider.updateAvatarImage(imageUrl.toString());
       });
-
-      // Exclui o arquivo temporário após o upload
-      await tempFile.delete();
     } catch (e) {
       print('Erro durante o upload: $e');
     }
@@ -205,195 +204,261 @@ class _ProfileUserState extends State<ProfileUser> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Profile User')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Card(
-                elevation: 4, // Sombra para destacar o card
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      if (profileUser != null) ...[
-                        ExpansionTile(
-                          title: Text('Profile photo'),
-                          children: [
-                            if (_imageFile != null) ...[
-                              Image.file(
-                                _imageFile!,
-                              ), // Exibe a prévia da imagem
-                              SizedBox(height: 10),
-                              ElevatedButton(
-                                onPressed: () {
-                                  _showImageSourceBottomSheet(context);
-                                },
-                                child: Text('Mudar Imagem'),
-                              ),
-                            ] else if (profileUser != null &&
-                                profileUser['photourl'] != null) ...[
-                              Image.network(
-                                profileUser['photourl'],
-                              ), // Exibe a imagem do perfil se houver
-                              SizedBox(height: 10),
-                              ElevatedButton(
-                                onPressed: () {
-                                  _showImageSourceBottomSheet(context);
-                                },
-                                child: Text('Alterar Imagem'),
-                              ),
-                            ] else ...[
-                              ElevatedButton(
-                                onPressed: () {
-                                  _showImageSourceBottomSheet(context);
-                                },
-                                child: Text('Upload Imagem'),
-                              ),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Card(
+                  elevation: 4, // Sombra para destacar o card
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        if (profileUser != null) ...[
+                          ExpansionTile(
+                            title: Text('Profile photo'),
+                            initiallyExpanded: _isExpanded,
+                            onExpansionChanged: (expanded) {
+                              setState(() {
+                                _isExpanded = expanded;
+                              });
+                            },
+                            tilePadding:
+                                EdgeInsets.zero, // Remove o padding interno
+                            childrenPadding:
+                                EdgeInsets.zero, // Remove o padding dos filhos
+                            collapsedBackgroundColor: Colors.transparent,
+                            backgroundColor:
+                                Colors
+                                    .transparent, // Remove o fundo quando expandido
+                            collapsedShape:
+                                Border(), // Remove a borda quando recolhido
+                            shape: Border(),
+                            children: [
+                              if (_imageFile != null) ...[
+                                Image.file(
+                                  _imageFile!,
+                                ), // Exibe a prévia da imagem
+                                SizedBox(height: 10),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    _showImageSourceBottomSheet(context);
+                                  },
+                                  child: Text('Mudar Imagem'),
+                                ),
+                              ] else if (profileUser != null &&
+                                  profileUser['photourl'] != null) ...[
+                                Image.network(
+                                  profileUser['photourl'],
+                                ), // Exibe a imagem do perfil se houver
+                                SizedBox(height: 10),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    _showImageSourceBottomSheet(context);
+                                  },
+                                  child: Text('Alterar Imagem'),
+                                ),
+                              ] else ...[
+                                ElevatedButton(
+                                  onPressed: () {
+                                    _showImageSourceBottomSheet(context);
+                                    setState(() {
+                                      _isExpanded = !_isExpanded;
+                                    });
+                                  },
+                                  child: Text('Upload Imagem'),
+                                ),
+                              ],
                             ],
-                          ],
-                        ),
-                        SizedBox(height: 20),
+                          ),
 
-                        // Accordion para o nome
-                        ExpansionTile(
-                          title: Text('Personal'),
-                          children: [
-                            if (profileUser['displayname'] != null) ...[
-                              Row(
-                                children: [
-                                  if (!isEditingName)
-                                    Text('Nome: ${profileUser['displayname']}'),
-                                  if (isEditingName)
-                                    Expanded(
-                                      child: TextField(
-                                        controller: _nameController,
-                                        decoration: InputDecoration(
-                                          labelText: 'Nome',
-                                          border: OutlineInputBorder(),
+                          SizedBox(height: 20),
+
+                          // Accordion para o nome
+                          ExpansionTile(
+                            title: Text('Personal'),
+                            initiallyExpanded: _isExpanded,
+                            onExpansionChanged: (expanded) {
+                              _isExpanded = expanded;
+                            },
+                            children: [
+                              if (profileUser['displayname'] != null) ...[
+                                Row(
+                                  children: [
+                                    if (!isEditingName)
+                                      Text(
+                                        'name: ',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                    ),
-                                  TextButton(
-                                    onPressed: () async {
-                                      setState(() {
-                                        isEditingName = !isEditingName;
-                                        if (!isEditingName) {
-                                          // Salvar o valor do nome (aqui você pode adicionar lógica para salvar no backend)
-                                          profileUser['displayname'] =
-                                              _nameController.text;
-                                        }
-                                      });
-                                      if (!isEditingName) {
-                                        await _updateProfile();
-                                      }
-                                    },
-                                    child: Text(
-                                      isEditingName ? 'Save' : 'Edit',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 5),
-                              Row(
-                                children: [
-                                  if (!isEditingEmail)
-                                    Text('Email: ${profileUser['email']}'),
-                                  if (isEditingEmail)
-                                    Expanded(
-                                      child: TextField(
-                                        controller: _emailController,
-                                        decoration: InputDecoration(
-                                          labelText: 'Email',
-                                          border: OutlineInputBorder(),
+                                    Text('${profileUser['displayname']}'),
+                                    if (isEditingName)
+                                      Expanded(
+                                        child: TextField(
+                                          controller: _nameController,
+                                          decoration: InputDecoration(
+                                            labelText: 'Nome',
+                                            border: OutlineInputBorder(),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  TextButton(
-                                    onPressed: (() async {
-                                      setState(() {
-                                        isEditingEmail = !isEditingEmail;
-                                        if (!isEditingEmail) {
-                                          profileUser['email'] =
-                                              _emailController.text;
-                                        }
-                                      });
-                                      if (!isEditingEmail) {
-                                        await _updateProfile();
-                                      }
-                                    }),
-                                    child: Text(
-                                      isEditingEmail ? 'save' : 'Edit',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    'Tipo de usuário: ${profileUser['usertype']}',
-                                  ),
-                                ],
-                              ),
-                            ] else
-                              Column(
-                                children: [
-                                  TextField(
-                                    controller: _nameController,
-                                    decoration: InputDecoration(
-                                      labelText:
-                                          '${profileUser['displayName']}',
-                                      hintText: 'full name',
-                                      helperText: 'Jõao da Silva',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  ),
-                                  TextField(
-                                    controller: _emailController,
-                                    decoration: InputDecoration(
-                                      labelText: '${profileUser['email']}',
-                                      hintText: 'email',
-                                      helperText: 'email@email.com',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: (() {
-                                      setState(() async {
-                                        isEditingName = !isEditingName;
+                                    TextButton(
+                                      onPressed: () async {
+                                        setState(() {
+                                          isEditingName = !isEditingName;
+                                          if (!isEditingName) {
+                                            // Salvar o valor do nome (aqui você pode adicionar lógica para salvar no backend)
+                                            profileUser['displayname'] =
+                                                _nameController.text;
+                                          }
+                                        });
                                         if (!isEditingName) {
-                                          profileUser['diplayname'] =
-                                              _nameController.text;
                                           await _updateProfile();
                                         }
-                                        // profileUser['diplayname'] = _nameController.text;
-                                      });
-                                    }),
-                                    child: const Text('Save'),
-                                  ),
-                                ],
-                              ),
-                          ],
-                        ),
-                        SizedBox(height: 10),
+                                      },
+                                      child: Text(
+                                        isEditingName ? 'Save' : 'Edit',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    if (!isEditingEmail)
+                                      Text(
+                                        'Email: ',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    Text(
+                                      '${profileUser['email']}',
+                                      style: TextStyle(fontSize: 12),
+                                    ),
+                                    if (isEditingEmail)
+                                      Expanded(
+                                        child: TextField(
+                                          controller: _emailController,
+                                          decoration: InputDecoration(
+                                            labelText: 'Email',
+                                            border: OutlineInputBorder(),
+                                          ),
+                                        ),
+                                      ),
+                                    /*email Text */
+                                    TextButton(
+                                      onPressed: (() async {
+                                        setState(() {
+                                          isEditingEmail = !isEditingEmail;
+                                          if (!isEditingEmail) {
+                                            profileUser['email'] =
+                                                _emailController.text;
+                                          }
+                                        });
+                                        if (!isEditingEmail) {
+                                          await _updateProfile();
+                                        }
+                                      }),
+                                      child: Text(
+                                        isEditingEmail ? 'save' : 'Edit',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Text('Tipo de usuário: '),
+                                    Text(
+                                      '${profileUser['usertype']}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Text(
+                                      'Criado em: ',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${profileUser['created_at'].toString().split('T')[0]}',
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'As :',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${profileUser['created_at'].toString().split('T')[1].substring(0, 5)}',
+                                    ),
+                                  ],
+                                ),
+                              ] else
+                                Column(
+                                  children: [
+                                    TextField(
+                                      controller: _nameController,
+                                      decoration: InputDecoration(
+                                        labelText:
+                                            '${profileUser['displayName']}',
+                                        hintText: 'full name',
+                                        helperText: 'Jõao da Silva',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                    ),
+                                    TextField(
+                                      controller: _emailController,
+                                      decoration: InputDecoration(
+                                        labelText: '${profileUser['email']}',
+                                        hintText: 'email',
+                                        helperText: 'email@email.com',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: (() {
+                                        setState(() async {
+                                          isEditingName = !isEditingName;
+                                          if (!isEditingName) {
+                                            profileUser['displayname'] =
+                                                _nameController.text;
+                                            await _updateProfile();
+                                          }
 
-                        // Accordion para a data de criação
-                        ExpansionTile(
-                          title: Text('Criado em'),
-                          children: [
-                            Text('Criado em: ${profileUser['created_at']}'),
-                          ],
-                        ),
-                      ] else
-                        Text('Carregando Perfil...'),
-                    ],
+                                          setState(() {
+                                            _isExpanded = !_isExpanded;
+                                          });
+                                          // profileUser['displayname'] = _nameController.text;
+                                        });
+                                      }),
+                                      child: const Text('Save'),
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          ),
+                          SizedBox(height: 10),
+                        ] else
+                          Text('Carregando Perfil...'),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

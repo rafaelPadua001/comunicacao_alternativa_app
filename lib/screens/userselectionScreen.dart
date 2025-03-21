@@ -1,6 +1,8 @@
 import 'package:comunicacao_alternativa_app/services/supabase_config.dart';
 import 'package:flutter/material.dart';
 import '../widgets/fullScreenDialog.dart';
+import 'package:provider/provider.dart';
+import '../notifier/notifier.dart';
 
 class UserSelectionScreen extends StatefulWidget {
   @override
@@ -13,14 +15,14 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
   @override
   void initState() {
     super.initState();
-     WidgetsBinding.instance.addPostFrameCallback((_) {
-    _checkLoginStatus();
-  });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkLoginStatus();
+    });
   }
 
   void _checkLoginStatus() async {
     final user = SupabaseConfig.supabase.auth.currentUser;
-    
+
     if (user != null) {
       try {
         final response =
@@ -65,25 +67,21 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
               break;
           }
         }
-        
       } catch (e) {}
-     
+    } else {
+      await _fullScreenDialog(context);
+      //print(_fullScreenDialog());
     }
-    else
-        {
-          await _fullScreenDialog(context);
-          //print(_fullScreenDialog());
-        }
   }
 
   Future<void> _fullScreenDialog(BuildContext context) async {
-    if(!mounted) return;
+    if (!mounted) return;
 
     await showDialog(
       context: context,
-      builder: (BuildContext context){
+      builder: (BuildContext context) {
         return Fullscreendialog();
-      }
+      },
     );
   }
 
@@ -105,58 +103,61 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Select Profile')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            RadioListTile<String>(
-              title: Text("Aluno"),
-              value: "Student",
-              groupValue: _selectedUserType,
-              onChanged: (value) {
-                setState(() {
-                  _selectedUserType = value;
-                });
-              },
-            ),
-            RadioListTile<String>(
-              title: Text("Professor"),
-              value: "Master",
-              groupValue: _selectedUserType,
-              onChanged: (value) {
-                setState(() {
-                  _selectedUserType = value;
-                });
-              },
-            ),
-            // RadioListTile<String>(
-            //   title: Text("Orientador"),
-            //   value: "Orientador",
-            //   groupValue: _selectedUserType,
-            //   onChanged: (value) {
-            //     setState(() {
-            //       _selectedUserType = value;
-            //     });
-            //   },
-            // ),
-            RadioListTile<String>(
-              title: Text("Administrador"),
-              value: "Administrador",
-              groupValue: _selectedUserType,
-              onChanged: (value) {
-                setState(() {
-                  _selectedUserType = value;
-                });
-              },
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _navigateToLogin,
-              child: Text("Continuar"),
-            ),
-          ],
+    return ChangeNotifierProvider(
+      create: (_) => AvatarProvider(),
+      child: Scaffold(
+        appBar: AppBar(title: Text('Select Profile')),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              RadioListTile<String>(
+                title: Text("Aluno"),
+                value: "Student",
+                groupValue: _selectedUserType,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedUserType = value;
+                  });
+                },
+              ),
+              RadioListTile<String>(
+                title: Text("Professor"),
+                value: "Master",
+                groupValue: _selectedUserType,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedUserType = value;
+                  });
+                },
+              ),
+              // RadioListTile<String>(
+              //   title: Text("Orientador"),
+              //   value: "Orientador",
+              //   groupValue: _selectedUserType,
+              //   onChanged: (value) {
+              //     setState(() {
+              //       _selectedUserType = value;
+              //     });
+              //   },
+              // ),
+              RadioListTile<String>(
+                title: Text("Administrador"),
+                value: "Administrador",
+                groupValue: _selectedUserType,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedUserType = value;
+                  });
+                },
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _navigateToLogin,
+                child: Text("Continuar"),
+              ),
+            ],
+          ),
         ),
       ),
     );
